@@ -4,6 +4,7 @@ import Palette from "./components/Palette";
 import Grid from "./components/Grid";
 import Inspector from "./components/Inspector";
 import { uuid, rectsOverlap } from "./utils";
+import { DEFAULT_PALETTE } from './components/default_palette';
 
 /*
   New state shapes:
@@ -51,7 +52,7 @@ function computeTotals(buildings) {
 
 export default function App() {
   // palette groups
-  const [paletteGroups, setPaletteGroups] = useState(starterPalette);
+  const [paletteGroups, setPaletteGroups] = useState(DEFAULT_PALETTE);
 
   // selected palette item
   const [selected, setSelected] = useState(null);
