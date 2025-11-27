@@ -4,7 +4,7 @@ import Palette from "./components/Palette";
 import Grid from "./components/Grid";
 import Inspector from "./components/Inspector";
 import { uuid, rectsOverlap } from "./utils";
-import { DEFAULT_PALETTE } from "./components/default_palette";
+import { DEFAULT_PALETTE } from "./default_palette";
 
 /*
   New state shapes:
