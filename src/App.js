@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useEffect, useState, useMemo } from "react";
-import { uuid, rectsOverlap, nowTimestamp } from "./utils";
+import { uuid, rectsOverlap } from "./utils";
 import * as sim from "./components/simulation";
 import PalettePanel from "./components/PalettePanel";
 import MapPanel from "./components/MapPanel";

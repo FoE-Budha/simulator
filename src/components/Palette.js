@@ -65,7 +65,7 @@ function Group({
               <div onClick={() => onSelect(p)} style={{ flex: 1 }}>
                 <div style={{ fontSize: 14 }}>{p.name}</div>
                 <div style={{ fontSize: 11, opacity: 0.7 }}>
-                  {p.w}x{p.h} • {p.group}
+                  {p.w}x{p.h} • {p.tier}
                 </div>
               </div>
               <div style={{ display: "flex", gap: 6 }}>
