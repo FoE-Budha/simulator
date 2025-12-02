@@ -123,7 +123,6 @@ export default function App() {
       // log the build
       const entry = {
         id: uuid("log_"),
-        ts: nowTimestamp(),
         kind: "build",
         label: type.name,
         detail: `Build ${type.name}`,
@@ -158,7 +157,6 @@ export default function App() {
       // log
       const entry = {
         id: uuid("log_"),
-        ts: nowTimestamp(),
         kind: "collect",
         label: type.name,
         detail: `Collect ${type.name}`,
@@ -188,7 +186,6 @@ export default function App() {
 
       const entry = {
         id: uuid("log_"),
-        ts: nowTimestamp(),
         kind: "sell",
         label: type.name,
         detail: `Sell ${type.name}`,
@@ -207,7 +204,6 @@ export default function App() {
     const sn = {
       id: uuid("snap_"),
       name: name || `Snapshot ${snapshots.length + 1}`,
-      ts: nowTimestamp(),
       resources: { ...resources },
       buildings: JSON.parse(JSON.stringify(buildings)),
       logs: JSON.parse(JSON.stringify(logs)),
