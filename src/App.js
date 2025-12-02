@@ -2,6 +2,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { uuid, rectsOverlap, nowTimestamp } from "./utils";
 import * as sim from "./components/simulation";
+import PalettePanel from "./components/PalettePanel";
+import MapPanel from "./components/MapPanel";
+import StatsPanel from "./components/StatsPanel";
 
 // import palette from root
 import { DEFAULT_PALETTE } from "./default_palette";
@@ -274,310 +277,44 @@ export default function App() {
   // UI render
   return (
     <div style={{ display: "flex", height: "100vh", gap: 12 }}>
-      {/* Left panel */}
-      <div
-        style={{
-          width: 320,
-          padding: 12,
-          background: "rgba(255,255,255,0.02)",
-        }}
-      >
-        <h3>Palette</h3>
-        {Object.keys(paletteGroups).map((groupKey) => (
-          <div key={groupKey} style={{ marginBottom: 8 }}>
-            <strong>{groupKey}</strong>
-            {(paletteGroups[groupKey] || []).map((p) => (
-              <div
-                key={p.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: 6,
-                  marginTop: 6,
-                  background:
-                    selectedType?.id === p.id
-                      ? "rgba(6,182,212,0.12)"
-                      : "transparent",
-                  borderRadius: 6,
-                }}
-              >
-                <div
-                  onClick={() => setSelectedType(p)}
-                  style={{ cursor: "pointer" }}
-                >
-                  {p.name}{" "}
-                  <div style={{ fontSize: 11, opacity: 0.7 }}>
-                    {p.w}x{p.h}
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button
-                    onClick={() => {
-                      // edit using prompt - you can replace with modal
-                      const newName = prompt("Name:", p.name);
-                      if (!newName) return;
-                      // simple inline edit - update group array
-                      setPaletteGroups((prev) => {
-                        const next = { ...prev };
-                        next[groupKey] = next[groupKey].map((x) =>
-                          x.id === p.id ? { ...x, name: newName } : x
-                        );
-                        return next;
-                      });
-                    }}
-                  >
-                    Edit
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ))}
-        <div style={{ marginTop: 12 }}>
-          <strong>Selected</strong>
-          <div
-            style={{
-              padding: 8,
-              marginTop: 6,
-              background: "rgba(255,255,255,0.01)",
-            }}
-          >
-            {selectedType ? (
-              <div>
-                {selectedType.name} ({selectedType.w}x{selectedType.h})
-              </div>
-            ) : (
-              "(none)"
-            )}
-          </div>
-        </div>
-      </div>
+      <PalettePanel
+        paletteGroups={paletteGroups}
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+        onEdit={() => {}}
+        onCreate={() => {}}
+      />
 
-      {/* Center map */}
-      <div style={{ flex: 1, padding: 12 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: 8,
-          }}
-        >
-          <div>
-            <strong>Map</strong>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              onClick={() => {
-                // add a chunk to the right-most area
-                // compute current maxCx, minCy (already computed)
-                const newCx = maxCx + 1;
-                const newCy = minCy;
-                setChunksMap((prev) => ({
-                  ...prev,
-                  [`${newCx},${newCy}`]: {
-                    id: uuid("chunk_"),
-                    cx: newCx,
-                    cy: newCy,
-                  },
-                }));
-              }}
-            >
-              Add 4x4 section
-            </button>
-            <button
-              onClick={() => {
-                if (confirm("Clear all buildings?")) setBuildings([]);
-              }}
-            >
-              Clear
-            </button>
-          </div>
-        </div>
+      <MapPanel
+        cols={cols}
+        rows={rows}
+        cellSize={cellSize}
+        buildings={buildings}
+        minCy={minCy}
+        minCx={minCx}
+        maxCx={maxCx}
+        handleGridClick={handleGridClick}
+        handleCollect={handleCollect}
+        handleSell={handleSell}
+        setChunksMap={setChunksMap}
+        setBuildings={setBuildings}
+        uuid={uuid}
+      />
 
-        <div
-          style={{
-            border: "1px solid rgba(255,255,255,0.04)",
-            overflow: "auto",
-            padding: 8,
-          }}
-        >
-          <div
-            onClick={handleGridClick}
-            style={{
-              width: cols * cellSize,
-              height: rows * cellSize,
-              position: "relative",
-              background: "linear-gradient(180deg,#081422,#071823)",
-            }}
-          >
-            {/* draw cell grid */}
-            {Array.from({ length: rows }).map((_, r) => (
-              <div key={r} style={{ display: "flex" }}>
-                {Array.from({ length: cols }).map((__, c) => (
-                  <div
-                    key={c}
-                    style={{
-                      width: cellSize,
-                      height: cellSize,
-                      border: "1px solid rgba(255,255,255,0.02)",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                ))}
-              </div>
-            ))}
-
-            {/* placed buildings */}
-            {buildings.map((b) => {
-              const left = (b.x - minCx * 4) * cellSize;
-              const top = (b.y - minCy * 4) * cellSize;
-              return (
-                <div
-                  key={b.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (
-                      confirm(
-                        "Collect this building? (OK=collect, Cancel=sell)"
-                      )
-                    )
-                      handleCollect(b.id);
-                    else handleSell(b.id);
-                  }}
-                  style={{
-                    position: "absolute",
-                    left,
-                    top,
-                    width: b.w * cellSize,
-                    height: b.h * cellSize,
-                    background: "linear-gradient(180deg,#9ae6b4,#68d391)",
-                    border: "1px solid rgba(0,0,0,0.6)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    fontSize: 12,
-                  }}
-                >
-                  {b.name}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Right panel */}
-      <div
-        style={{
-          width: 360,
-          padding: 12,
-          background: "rgba(255,255,255,0.02)",
-          overflow: "auto",
-        }}
-      >
-        <h3>Stats</h3>
-        <div>
-          <div>Coins: {resources.coins}</div>
-          <div>Supplies: {resources.supplies}</div>
-          <div>Goods: {resources.goods}</div>
-          <div>Alloy: {resources.alloy}</div>
-          <div>Quantum: {resources.quantumActions}</div>
-
-          <div style={{ marginTop: 8 }}>Population: {resources.population}</div>
-          <div>
-            Euphoria Units: {resources.euphoria} (ratio: {aggregates.euphRatio}%
-            | multiplier: {aggregates.eupMultiplier}×)
-          </div>
-          <div>Coin Boost: {Math.round(resources.coinBoost * 100)}%</div>
-          <div>Supply Boost: {Math.round(resources.suppliesBoost * 100)}%</div>
-
-          <div style={{ marginTop: 8 }}>
-            <button onClick={() => saveSnapshot()}>Save Snapshot</button>
-            <button onClick={() => exportLogs()} style={{ marginLeft: 8 }}>
-              Export Logs
-            </button>
-          </div>
-        </div>
-
-        <h4 style={{ marginTop: 12 }}>Snapshots</h4>
-        <div>
-          {snapshots.map((s) => (
-            <div
-              key={s.id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: 6,
-                background: "rgba(255,255,255,0.01)",
-                marginTop: 6,
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 13 }}>{s.name}</div>
-                <div style={{ fontSize: 11, opacity: 0.7 }}>{s.ts}</div>
-              </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button onClick={() => compareSnapshot(s.id)}>Compare</button>
-                <button
-                  onClick={() => {
-                    if (
-                      confirm(
-                        "Restore this snapshot (replaces current resources & map)?"
-                      )
-                    ) {
-                      setBuildings(s.buildings);
-                      setResources(s.resources);
-                      setLogs(s.logs);
-                      alert("Restored");
-                    }
-                  }}
-                >
-                  Restore
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <h4 style={{ marginTop: 12 }}>Last Compare</h4>
-        {lastCompare ? (
-          <div>
-            <div>Snapshot: {lastCompare.snap.name}</div>
-            <div>Δ Coins: {lastCompare.diff.coins}</div>
-            <div>Δ Supplies: {lastCompare.diff.supplies}</div>
-            <div>Δ Alloy: {lastCompare.diff.alloy}</div>
-            <div>Δ Population: {lastCompare.diff.population}</div>
-          </div>
-        ) : (
-          <div style={{ opacity: 0.7 }}>No comparison yet</div>
-        )}
-
-        <h4 style={{ marginTop: 12 }}>Action Log</h4>
-        <div
-          style={{
-            maxHeight: 240,
-            overflow: "auto",
-            background: "rgba(0,0,0,0.12)",
-            padding: 8,
-          }}
-        >
-          {logs.map((l) => (
-            <div key={l.id} style={{ marginBottom: 6, fontSize: 13 }}>
-              <div>
-                <strong>
-                  [{l.ts}] {l.kind.toUpperCase()}
-                </strong>{" "}
-                {l.label}
-              </div>
-              <div style={{ fontSize: 12, opacity: 0.9 }}>
-                {formatDelta(l.delta)}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <StatsPanel
+        resources={resources}
+        aggregates={aggregates}
+        snapshots={snapshots}
+        logs={logs}
+        lastCompare={lastCompare}
+        saveSnapshot={saveSnapshot}
+        exportLogs={exportLogs}
+        compareSnapshot={compareSnapshot}
+        setBuildings={setBuildings}
+        setResources={setResources}
+        setLogs={setLogs}
+        formatDelta={formatDelta}
+      />
     </div>
   );
 }
