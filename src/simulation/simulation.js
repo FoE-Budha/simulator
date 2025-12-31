@@ -1,7 +1,7 @@
 // src/simulation.js
 // Simulation engine: handles state transforms, totals calculation, logs and snapshots.
 // Import palette from project root default_palette.js
-import { DEFAULT_PALETTE } from "../default_palette";
+import { DEFAULT_PALETTE } from "../data/default_palette";
 
 /*
 This module exposes helper functions that operate on data structures used
