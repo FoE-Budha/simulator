@@ -5,7 +5,7 @@ import { uuid } from "../utils";
 import PalettePanel from "../components/palette/PalettePanel";
 import MapPanel from "../components/MapPanel";
 import StatsPanel from "../components/stats/StatsPanel";
-//import ChunkDialog from "./components/dialogs/ChunkDialog";
+import ChunkDialog from "../components/dialogs/ChunkDialog";
 
 import * as sim from "../simulation/simulation";
 import { DEFAULT_PALETTE } from "../data/default_palette";

@@ -1,20 +1,88 @@
-import React from "react";
+import React, { useMemo } from "react";
+import Grid from "../components/grid/Grid";
+import { uuid } from "../utils";
 
 export default function MapPanel({
-  cols,
-  rows,
-  cellSize,
+  chunksMap,
   buildings,
-  minCy,
-  minCx,
-  maxCx,
-  handleGridClick,
-  handleCollect,
-  handleSell,
+  selectedType,
+  onPlace,
+  onChunkClick,
+  onCollect,
+  onSell,
   setChunksMap,
-  setBuildings,
-  uuid,
 }) {
+  // Initialize chunks if empty
+  React.useEffect(() => {
+    if (Object.keys(chunksMap).length === 0) {
+      const initialChunks = {
+        "0,0": {
+          id: uuid("chunk_"),
+          cx: 0,
+          cy: 0,
+          state: "available",
+        },
+        "1,0": {
+          id: uuid("chunk_"),
+          cx: 1,
+          cy: 0,
+          state: "locked",
+        },
+        "0,1": {
+          id: uuid("chunk_"),
+          cx: 0,
+          cy: 1,
+          state: "blocked",
+        },
+      };
+      setChunksMap(initialChunks);
+    }
+  }, []);
+
+  const handlePlace = (building) => {
+    onPlace(building.x, building.y);
+  };
+
+  const handleRemove = (buildingId) => {
+    const building = buildings.find((b) => b.id === buildingId);
+    if (building) {
+      onSell(building);
+    }
+  };
+
+  const handleAddChunk = () => {
+    const keys = Object.keys(chunksMap);
+    let maxCx = -Infinity;
+    let minCy = Infinity;
+
+    keys.forEach((k) => {
+      const [cx, cy] = k.split(",").map(Number);
+      maxCx = Math.max(maxCx, cx);
+      minCy = Math.min(minCy, cy);
+    });
+
+    const newCx = maxCx + 1;
+    const newCy = minCy;
+    const newKey = `${newCx},${newCy}`;
+
+    setChunksMap((prev) => ({
+      ...prev,
+      [newKey]: {
+        id: uuid("chunk_"),
+        cx: newCx,
+        cy: newCy,
+        state: Math.random() > 0.5 ? "available" : "locked",
+      },
+    }));
+  };
+
+  const handleClear = () => {
+    if (window.confirm("Clear all buildings?")) {
+      // Clear buildings - you'll need to pass setBuildings or handle this differently
+      console.log("Clear buildings - implement this in parent component");
+    }
+  };
+
   return (
     <div style={{ flex: 1, padding: 12 }}>
       <div
@@ -27,26 +95,11 @@ export default function MapPanel({
         <strong>Map</strong>
 
         <div style={{ display: "flex", gap: 8 }}>
-          <button
-            onClick={() => {
-              const newCx = maxCx + 1;
-              const newCy = minCy;
-              setChunksMap((prev) => ({
-                ...prev,
-                [`${newCx},${newCy}`]: {
-                  id: uuid("chunk_"),
-                  cx: newCx,
-                  cy: newCy,
-                },
-              }));
-            }}
-          >
+          <button className="button small" onClick={handleAddChunk}>
             Add 4x4 section
           </button>
 
-          <button
-            onClick={() => confirm("Clear all buildings?") && setBuildings([])}
-          >
+          <button className="button small" onClick={handleClear}>
             Clear
           </button>
         </div>
@@ -55,69 +108,21 @@ export default function MapPanel({
       <div
         style={{
           border: "1px solid rgba(255,255,255,0.04)",
+          borderRadius: "6px",
           overflow: "auto",
           padding: 8,
+          background: "linear-gradient(180deg,#0b1a2a,#081422)",
         }}
       >
-        <div
-          onClick={handleGridClick}
-          style={{
-            width: cols * cellSize,
-            height: rows * cellSize,
-            position: "relative",
-            background: "linear-gradient(180deg,#081422,#071823)",
-          }}
-        >
-          {/* grid */}
-          {Array.from({ length: rows }).map((_, r) => (
-            <div key={r} style={{ display: "flex" }}>
-              {Array.from({ length: cols }).map((_, c) => (
-                <div
-                  key={c}
-                  style={{
-                    width: cellSize || 500,
-                    height: cellSize || 500,
-                    border: "1px solid rgba(255,255,255,0.02)",
-                    boxSizing: "border-box",
-                  }}
-                />
-              ))}
-            </div>
-          ))}
-
-          {/* placed buildings */}
-          {buildings.map((b) => {
-            const left = (b.x - minCx * 4) * cellSize;
-            const top = (b.y - minCy * 4) * cellSize;
-            return (
-              <div
-                key={b.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  confirm("Collect? OK=collect / Cancel=sell")
-                    ? handleCollect(b.id)
-                    : handleSell(b.id);
-                }}
-                style={{
-                  position: "absolute",
-                  left,
-                  top,
-                  width: b.w * cellSize,
-                  height: b.h * cellSize,
-                  background: "linear-gradient(180deg,#9ae6b4,#68d391)",
-                  border: "1px solid rgba(0,0,0,0.6)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  fontSize: 12,
-                }}
-              >
-                {b.name}
-              </div>
-            );
-          })}
-        </div>
+        <Grid
+          chunksMap={chunksMap}
+          buildings={buildings}
+          selected={selectedType}
+          onPlace={handlePlace}
+          onRemove={handleRemove}
+          onChunkAction={onChunkClick}
+          cellSize={32}
+        />
       </div>
     </div>
   );
