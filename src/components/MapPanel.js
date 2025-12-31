@@ -75,8 +75,8 @@ export default function MapPanel({
                 <div
                   key={c}
                   style={{
-                    width: cellSize,
-                    height: cellSize,
+                    width: cellSize || 500,
+                    height: cellSize || 500,
                     border: "1px solid rgba(255,255,255,0.02)",
                     boxSizing: "border-box",
                   }}
