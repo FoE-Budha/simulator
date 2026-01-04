@@ -4,10 +4,10 @@ import { uuid } from "../utils";
 
 // Mode constants
 const MODES = {
-  PLACE: 'place',
-  MOVE: 'move',
-  COLLECT: 'collect',
-  SELL: 'sell'
+  PLACE: "place",
+  MOVE: "move",
+  COLLECT: "collect",
+  SELL: "sell",
 };
 
 export default function MapPanel({
@@ -23,12 +23,12 @@ export default function MapPanel({
 }) {
   const [mode, setMode] = useState(MODES.PLACE);
   const [selectedForMove, setSelectedForMove] = useState(null);
-  
+
   // Initialize chunks
   useEffect(() => {
     if (Object.keys(chunksMap).length === 0) {
       const initialChunks = {};
-      
+
       const nonExistingChunks = [
         [0, 0],
         [1, 0],
@@ -54,30 +54,30 @@ export default function MapPanel({
         [5, 2],
         [5, 3],
       ];
-      
+
       for (let cx = 0; cx <= 6; cx++) {
         for (let cy = 0; cy <= 6; cy++) {
           const isNonExisting = nonExistingChunks.some(
             ([nx, ny]) => nx === cx && ny === cy
           );
           if (isNonExisting) continue;
-          
+
           const key = `${cx},${cy}`;
           const isUnlocked = unlockedChunks.some(
             ([ux, uy]) => ux === cx && uy === cy
           );
-          
+
           let state = isUnlocked ? "available" : "locked";
-          
+
           initialChunks[key] = {
             id: uuid("chunk_"),
             cx,
             cy,
-            state
+            state,
           };
         }
       }
-      
+
       setChunksMap(initialChunks);
     }
   }, []);
@@ -89,19 +89,14 @@ export default function MapPanel({
         // Select building for moving
         setSelectedForMove(building);
         break;
-        
+
       case MODES.COLLECT:
         // Collect from building
         onCollect(building);
         break;
-        
+
       case MODES.SELL:
         // Sell building
-        onSell(building);
-        break;
-        
-      default:
-        // In place mode, clicking sells (backward compatibility)
         onSell(building);
         break;
     }
@@ -130,7 +125,7 @@ export default function MapPanel({
       case MODES.PLACE:
         return "Click on grid to place selected building";
       case MODES.MOVE:
-        return selectedForMove 
+        return selectedForMove
           ? `Moving ${selectedForMove.name}. Click where to move it`
           : "Click a building to select it for moving, then click where to move it";
       case MODES.COLLECT:
@@ -158,56 +153,60 @@ export default function MapPanel({
         <div style={{ display: "flex", gap: 8 }}>
           {/* Mode buttons */}
           <button
-            className={`button small ${mode === MODES.PLACE ? 'active' : ''}`}
+            className={`button small ${mode === MODES.PLACE ? "active" : ""}`}
             onClick={() => {
               setMode(MODES.PLACE);
               setSelectedForMove(null);
             }}
             style={{
-              background: mode === MODES.PLACE ? "#06b6d4" : "rgba(255,255,255,0.1)",
-              color: mode === MODES.PLACE ? "#021827" : "#e6eef8"
+              background:
+                mode === MODES.PLACE ? "#06b6d4" : "rgba(255,255,255,0.1)",
+              color: mode === MODES.PLACE ? "#021827" : "#e6eef8",
             }}
           >
             Place
           </button>
-          
+
           <button
-            className={`button small ${mode === MODES.MOVE ? 'active' : ''}`}
+            className={`button small ${mode === MODES.MOVE ? "active" : ""}`}
             onClick={() => {
               setMode(MODES.MOVE);
               setSelectedForMove(null);
             }}
             style={{
-              background: mode === MODES.MOVE ? "#06b6d4" : "rgba(255,255,255,0.1)",
-              color: mode === MODES.MOVE ? "#021827" : "#e6eef8"
+              background:
+                mode === MODES.MOVE ? "#06b6d4" : "rgba(255,255,255,0.1)",
+              color: mode === MODES.MOVE ? "#021827" : "#e6eef8",
             }}
           >
             Move
           </button>
-          
+
           <button
-            className={`button small ${mode === MODES.COLLECT ? 'active' : ''}`}
+            className={`button small ${mode === MODES.COLLECT ? "active" : ""}`}
             onClick={() => {
               setMode(MODES.COLLECT);
               setSelectedForMove(null);
             }}
             style={{
-              background: mode === MODES.COLLECT ? "#10b981" : "rgba(255,255,255,0.1)",
-              color: mode === MODES.COLLECT ? "#021827" : "#e6eef8"
+              background:
+                mode === MODES.COLLECT ? "#10b981" : "rgba(255,255,255,0.1)",
+              color: mode === MODES.COLLECT ? "#021827" : "#e6eef8",
             }}
           >
             Collect
           </button>
-          
+
           <button
-            className={`button small ${mode === MODES.SELL ? 'active' : ''}`}
+            className={`button small ${mode === MODES.SELL ? "active" : ""}`}
             onClick={() => {
               setMode(MODES.SELL);
               setSelectedForMove(null);
             }}
             style={{
-              background: mode === MODES.SELL ? "#ef4444" : "rgba(255,255,255,0.1)",
-              color: mode === MODES.SELL ? "#021827" : "#e6eef8"
+              background:
+                mode === MODES.SELL ? "#ef4444" : "rgba(255,255,255,0.1)",
+              color: mode === MODES.SELL ? "#021827" : "#e6eef8",
             }}
           >
             Sell
@@ -216,28 +215,32 @@ export default function MapPanel({
       </div>
 
       {/* Mode instructions */}
-      <div style={{ 
-        marginBottom: "12px", 
-        fontSize: "12px", 
-        color: "#94a3b8",
-        padding: "8px",
-        background: "rgba(255,255,255,0.03)",
-        borderRadius: "4px",
-        minHeight: "40px",
-        display: "flex",
-        alignItems: "center"
-      }}>
+      <div
+        style={{
+          marginBottom: "12px",
+          fontSize: "12px",
+          color: "#94a3b8",
+          padding: "8px",
+          background: "rgba(255,255,255,0.03)",
+          borderRadius: "4px",
+          minHeight: "40px",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
         <div>
           <strong>Mode:</strong> {mode.toUpperCase()}
           <span style={{ marginLeft: "12px" }}>{getModeDescription()}</span>
           {selectedForMove && (
-            <span style={{ 
-              marginLeft: "12px", 
-              color: "#06b6d4",
-              background: "rgba(6, 182, 212, 0.1)",
-              padding: "2px 8px",
-              borderRadius: "4px"
-            }}>
+            <span
+              style={{
+                marginLeft: "12px",
+                color: "#06b6d4",
+                background: "rgba(6, 182, 212, 0.1)",
+                padding: "2px 8px",
+                borderRadius: "4px",
+              }}
+            >
               Selected: {selectedForMove.name}
             </span>
           )}
