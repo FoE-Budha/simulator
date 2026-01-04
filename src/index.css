@@ -16,3 +16,6 @@ body { margin: 0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Robo
 .cell { width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.04); display: inline-block; background: rgba(255,255,255,0.01); box-sizing: border-box; }
 .building { position: absolute; border-radius: 4px; padding: 4px; font-size: 11px; display:flex; align-items:center; justify-content:center; color:#041324; }
 .footer { margin-top: 12px; font-size: 13px; color: var(--muted); }
+.select {  background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #e6eef8; padding: 6px 8px; font-size: 13px; font-family: inherit; cursor: pointer; }
+.select:focus {  outline: none; border-color: #06b6d4; }
+.select option {  background: #0b1220; color: #e6eef8; }

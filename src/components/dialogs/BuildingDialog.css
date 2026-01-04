@@ -1,0 +1,193 @@
+.building-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.building-dialog-content {
+  background: var(--panel);
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.building-dialog-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #e6eef8;
+}
+
+.building-dialog-section {
+  margin-bottom: 20px;
+}
+
+.building-dialog-section-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.building-dialog-section-basic .building-dialog-section-title {
+  color: #06b6d4;
+}
+
+.building-dialog-section-costs .building-dialog-section-title {
+  color: #ef4444;
+}
+
+.building-dialog-section-production .building-dialog-section-title {
+  color: #10b981;
+}
+
+.building-dialog-section-effects .building-dialog-section-title {
+  color: #8b5cf6;
+}
+
+.building-dialog-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.building-dialog-grid-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.building-dialog-field {
+  margin-bottom: 8px;
+}
+
+.building-dialog-label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+  opacity: 0.8;
+  color: #94a3b8;
+}
+
+.building-dialog-input,
+.building-dialog-select {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #e6eef8;
+  font-size: 13px;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.building-dialog-input:focus,
+.building-dialog-select:focus {
+  outline: none;
+  border-color: #06b6d4;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
+}
+
+.building-dialog-input:hover,
+.building-dialog-select:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Special styling for select dropdown */
+.building-dialog-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 30px;
+  cursor: pointer;
+}
+
+/* Style dropdown options */
+.building-dialog-select option {
+  background: #0b1220;
+  color: #e6eef8;
+  padding: 8px;
+}
+
+/* For Firefox */
+@-moz-document url-prefix() {
+  .building-dialog-select {
+    color: #e6eef8;
+    text-shadow: 0 0 0 #e6eef8;
+  }
+  
+  .building-dialog-select option {
+    background: #0b1220;
+    color: #e6eef8;
+  }
+}
+
+/* Number input spinners */
+.building-dialog-input[type="number"]::-webkit-inner-spin-button,
+.building-dialog-input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.building-dialog-input[type="number"]:hover::-webkit-inner-spin-button,
+.building-dialog-input[type="number"]:hover::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+.building-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.building-dialog-cancel {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+}
+
+.building-dialog-cancel:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.building-dialog-submit {
+  background: var(--accent) !important;
+  color: #021827 !important;
+}
+
+.building-dialog-submit:hover {
+  background: #0dc7e0 !important;
+}
+
+/* Scrollbar styling for the dialog */
+.building-dialog-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.building-dialog-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.building-dialog-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.building-dialog-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

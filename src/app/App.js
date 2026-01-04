@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useMemo } from "react";
 import { uuid } from "../utils";
 
@@ -6,6 +5,7 @@ import PalettePanel from "../components/palette/PalettePanel";
 import MapPanel from "../components/MapPanel";
 import StatsPanel from "../components/stats/StatsPanel";
 import ChunkDialog from "../components/dialogs/ChunkDialog";
+import BuildingDialog from "../components/dialogs/BuildingDialog";
 
 import * as sim from "../simulation/simulation";
 import { DEFAULT_PALETTE } from "../data/default_palette";
@@ -57,18 +57,75 @@ export default function App() {
   );
 
   // -----------------------------
+  // HELPER FUNCTIONS
+  // -----------------------------
+
+  const getBuildingTypeFromPalette = (typeId) => {
+    for (const groupKey in paletteGroups) {
+      const group = paletteGroups[groupKey];
+      if (Array.isArray(group)) {
+        const found = group.find(type => type.id === typeId);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  // -----------------------------
   // CORE ACTIONS
   // -----------------------------
 
   const handlePlaceBuilding = (x, y) => {
     if (!selectedType) return;
-
+  
+    const required = sim.costs(selectedType);
+    const populationEffect = selectedType.population;
+    
+    // Check each resource individually to provide specific feedback
+    let missingResources = [];
+    
+    if (resources.coins < required.coins) {
+      missingResources.push(`${required.coins - resources.coins} coins`);
+    }
+    if (resources.supplies < required.supplies) {
+      missingResources.push(`${required.supplies - resources.supplies} supplies`);
+    }
+    if (resources.alloy < required.alloy) {
+      missingResources.push(`${required.alloy - resources.alloy} alloy`);
+    }
+    // Check if building consumes population and we don't have enough
+    if (populationEffect < 0) { // Negative means it consumes population
+      const populationRequired = Math.abs(populationEffect);
+      if (resources.population < populationRequired) {
+        missingResources.push(`${populationRequired - resources.population} population`);
+      }
+    }
+    
+    // If any resources are missing, show alert and stop
+    if (missingResources.length > 0) {
+      alert(`Cannot build ${selectedType.name}\n\nMissing:\n${missingResources.join('\n')}`);
+      return;
+    }
+    
+    // If we get here, build is successful
     const result = sim.applyBuild(resources, selectedType);
     if (!result) return;
-
+  
+    const log = {
+      id: uuid("log_"),
+      type: "build",
+      message: `Built ${selectedType.name}`,
+      resources: result.resources,
+      details: { 
+        building: selectedType.name,
+        cost: result.delta,
+        coordinates: { x, y }  // Important for merging same-building placements
+      }
+    };
+    addLog(log);
+  
     setResources(result.resources);
-    setLogs((l) => [...l, result.log]);
-
+  
     setBuildings((prev) => [
       ...prev,
       {
@@ -83,17 +140,86 @@ export default function App() {
     ]);
   };
 
+
+  // Add move handler 
+  const handleMoveBuilding = (buildingId, newX, newY) => {
+    setBuildings(prev => prev.map(building => {
+      if (building.id === buildingId) {
+        // Create a log for the move
+        const log = {
+          id: uuid("log_"),
+          type: "move",
+          message: `Moved ${building.name}`,
+          resources: resources,
+          details: { 
+            building: building.name,
+            from: { x: building.x, y: building.y },
+            to: { x: newX, y: newY }
+          }
+        };
+        addLog(log);
+        
+        // Update building position
+        return {
+          ...building,
+          x: newX,
+          y: newY
+        };
+      }
+      return building;
+    }));
+  };
+
+
   const handleCollect = (building) => {
-    const result = sim.applyCollect(resources, building, aggregates);
+    const buildingType = getBuildingTypeFromPalette(building.typeId);
+    if (!buildingType) return;
+
+    // 1. FIRST get the result
+    const result = sim.applyCollect(resources, buildingType, aggregates);
+    if (!result) return;
+
+    // 2. THEN create log
+    const log = {
+      id: uuid("log_"),
+      type: "collect",
+      message: `Collected from ${building.name}`,
+      resources: result.resources,
+      details: { 
+        building: building.name,
+        yield: result.delta 
+      }
+    };
+    addLog(log);
+    
+    // 3. Update state
     setResources(result.resources);
-    setLogs((l) => [...l, result.log]);
   };
 
   const handleSell = (building) => {
-    const result = sim.applySell(resources, building);
+    const buildingType = getBuildingTypeFromPalette(building.typeId);
+    if (!buildingType) return;
+
+    // 1. FIRST get the result
+    const result = sim.applySell(resources, buildingType);
+    if (!result) return;
+
+    // 2. THEN create log
+    const log = {
+      id: uuid("log_"),
+      type: "sell",
+      message: `Sold ${building.name}`,
+      resources: result.resources,
+      details: { 
+        building: building.name,
+        refund: result.delta 
+      }
+    };
+    
+    // 3. Update state
     setResources(result.resources);
     setBuildings((b) => b.filter((x) => x.id !== building.id));
-    setLogs((l) => [...l, result.log]);
+    addLog(log);
   };
 
   const handleChunkClick = (chunk) => {
@@ -130,6 +256,100 @@ export default function App() {
   };
 
   // -----------------------------
+  // Log Creation
+  // -----------------------------
+  const addLog = (newLog) => {
+    setLogs((prevLogs) => {
+      // If no logs yet, just add the new one
+      if (prevLogs.length === 0) {
+        return [{ ...newLog, count: 1 }];
+      }
+      
+      const lastLog = prevLogs[prevLogs.length - 1];
+      
+      // Check if we can merge with the last log
+      let canMerge = false;
+      
+      if (lastLog.type === newLog.type && lastLog.details?.building === newLog.details?.building) {
+        // Merge all types: build, collect, and sell
+        canMerge = true;
+      }
+      
+      if (canMerge) {
+        // Merge logs
+        const mergedCount = (lastLog.count || 1) + 1;
+        const mergedLog = {
+          ...lastLog,
+          count: mergedCount,
+          resources: newLog.resources, // Update to latest resources
+          // Clean message - remove any existing count prefix
+          message: `${mergedCount}x ${newLog.message.replace(/^\d+x\s/, '').replace(/^\(\d+\)\s/, '')}`
+        };
+        
+        // Replace last log with merged one
+        return [...prevLogs.slice(0, -1), mergedLog];
+      }
+      
+      // Can't merge, add as new log
+      return [...prevLogs, { ...newLog, count: 1 }];
+    });
+  };
+
+  // -----------------------------
+  // Building Menu
+  // -----------------------------
+
+  // Add this to your state in App.js:
+  const [buildingDialog, setBuildingDialog] = useState(null); // null | {building: null} for new | {building: object} for edit
+
+  // Add these handler functions:
+  const handleCreateBuilding = () => {
+    setBuildingDialog({ building: null }); // Open dialog for new building
+  };
+
+  const handleEditBuilding = (building) => {
+    setBuildingDialog({ building }); // Open dialog for editing
+  };
+
+  const handleSaveBuilding = (buildingData, group) => {
+    if (buildingDialog.building) {
+      // Edit existing building
+      setPaletteGroups(prev => {
+        const newGroups = { ...prev };
+        
+        // Remove from old group
+        Object.keys(newGroups).forEach(groupKey => {
+          newGroups[groupKey] = newGroups[groupKey].filter(b => b.id !== buildingData.id);
+        });
+        
+        // Add to new group
+        if (!newGroups[group]) {
+          newGroups[group] = [];
+        }
+        newGroups[group].push(buildingData);
+        
+        return newGroups;
+      });
+    } else {
+      // Add new building
+      setPaletteGroups(prev => {
+        const newGroups = { ...prev };
+        if (!newGroups[group]) {
+          newGroups[group] = [];
+        }
+        newGroups[group].push(buildingData);
+        return newGroups;
+      });
+    }
+    
+    setBuildingDialog(null);
+  };
+
+  const handleCloseBuildingDialog = () => {
+    setBuildingDialog(null);
+  };
+
+  // -----------------------------
   // RENDER
   // -----------------------------
 
@@ -139,6 +359,8 @@ export default function App() {
         paletteGroups={paletteGroups}
         selectedType={selectedType}
         setSelectedType={setSelectedType}
+        onEdit={handleEditBuilding}
+        onCreate={handleCreateBuilding}
       />
 
       <MapPanel
@@ -149,6 +371,7 @@ export default function App() {
         onChunkClick={handleChunkClick}
         onCollect={handleCollect}
         onSell={handleSell}
+        onMove={handleMoveBuilding}
         setChunksMap={setChunksMap}
       />
 
@@ -170,6 +393,15 @@ export default function App() {
             console.log("Unlock with:", type);
             setChunkDialog(null);
           }}
+        />
+      )}
+
+      {buildingDialog && (
+        <BuildingDialog
+          building={buildingDialog.building}
+          onSave={handleSaveBuilding}
+          onClose={handleCloseBuildingDialog}
+          paletteGroups={paletteGroups}
         />
       )}
     </div>
