@@ -19,6 +19,7 @@ const initialResources = {
   supplies: 75000,
   goods: 20,
   alloy: 0,
+  shards: 0,
   quantumActions: 0,
 
   population: 0,
@@ -316,13 +317,13 @@ export default function App() {
   // Add this to your state in App.js:
   const [buildingDialog, setBuildingDialog] = useState(null); // null | {building: null} for new | {building: object} for edit
 
-  // Add these handler functions:
+  // Open dialog for new building:
   const handleCreateBuilding = () => {
-    setBuildingDialog({ building: null }); // Open dialog for new building
+    setBuildingDialog({ building: null });
   };
 
   const handleEditBuilding = (building) => {
-    setBuildingDialog({ building }); // Open dialog for editing
+    setBuildingDialog({ building });
   };
 
   const handleSaveBuilding = (buildingData, group) => {

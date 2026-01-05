@@ -158,11 +158,11 @@ export default function PalettePanel({
                         <div className="palette-item-details">
                           {/* Only show costs if they are greater than 0 */}
                           {item.cost_coins > 0 &&
-                            ` • ${formatNumber(item.cost_coins)} coins`}
+                            ` C: ${formatNumber(item.cost_coins)} •`}
                           {item.cost_supplies > 0 &&
-                            ` • ${formatNumber(item.cost_supplies)} supplies`}
+                            ` S: ${formatNumber(item.cost_supplies)} •`}
                           {item.cost_alloy > 0 &&
-                            ` • ${formatNumber(item.cost_alloy)} alloy`}
+                            ` Alloy: ${formatNumber(item.cost_alloy)} `}
                           {/* Show nothing if all costs are 0 or undefined */}
                           {(!item.cost_coins || item.cost_coins <= 0) &&
                             (!item.cost_supplies || item.cost_supplies <= 0) &&
