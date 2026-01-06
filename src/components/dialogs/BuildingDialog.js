@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { uuid } from "../../utils";
-import "./BuildingDialog.css";
+import "./Dialog.css";
 
 export default function BuildingDialog({
   building = null,

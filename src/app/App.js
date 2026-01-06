@@ -243,7 +243,7 @@ export default function App() {
     setChunkDialog(chunk);
   };
 
-  // UPDATED: Chunk unlocking with global counters
+  // Chunk unlocking with global counters
   const handleUnlockChunk = (chunkKey, unlockData) => {
     const { type, amount } = unlockData;
 
@@ -258,7 +258,7 @@ export default function App() {
       return;
     }
 
-    // Update GLOBAL unlock counter for this type
+    // Update GLOBAL unlock counter
     setUnlockCounts((prev) => ({
       ...prev,
       [type]: prev[type] + 1,
@@ -283,7 +283,7 @@ export default function App() {
     addLog({
       id: uuid("log_"),
       type: "unlock",
-      message: `Unlocked chunk ${chunkKey} with ${amount} ${type}`,
+      message: `Unlocked expansion with ${amount} ${type}`,
       resources: {
         ...resources,
         [type]: resources[type] - amount,

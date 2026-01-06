@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./BuildingDialog.css"; // Reuse the same styles
+import "./Dialog.css"; // Reuse the same styles
 
 export default function ResourcesDialog({ resources, onSave, onClose }) {
   const [formData, setFormData] = useState({
