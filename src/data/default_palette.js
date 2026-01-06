@@ -1,4 +1,27 @@
 export const DEFAULT_PALETTE = {
+  townhall: [
+    {
+      id: "town hall_1764107877",
+      name: "Town Hall",
+      w: 7,
+      h: 6,
+      tier: "T1",
+      group: "townhall",
+      cost_coins: 0,
+      cost_supplies: 0,
+      cost_alloy: 0,
+      produces_coins: 50000.0,
+      produces_supplies: 50000,
+      produces_alloy: 15.0,
+      population: 0,
+      euphoria: 0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0,
+      defense: 0,
+      quantum_actions: 0,
+    },
+  ],
   residential: [
     {
       id: "multistorey house_1764107877",

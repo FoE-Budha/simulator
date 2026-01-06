@@ -29,12 +29,6 @@
   cursor: pointer;
 }
 
-.chunk.blocked {
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 0, 0, 0.3);
-  cursor: not-allowed;
-}
-
 .row {
   display: flex;
 }
@@ -86,9 +80,15 @@
 
 /* Optional: Add a pulsing animation for the hover effect */
 @keyframes pulse {
-  0% { opacity: 0.3; }
-  50% { opacity: 0.5; }
-  100% { opacity: 0.3; }
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.3;
+  }
 }
 
 .building-hover {
