@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Dialog.css"; // Reuse the same styles
+import { formatNumber } from "../../utils.js";
 
 export default function ResourcesDialog({ resources, onSave, onClose }) {
   const [formData, setFormData] = useState({
@@ -51,14 +52,14 @@ export default function ResourcesDialog({ resources, onSave, onClose }) {
           key: "coins",
           label: "Coins",
           type: "number",
-          step: "1000",
+          step: "1",
           min: "0",
         },
         {
           key: "supplies",
           label: "Supplies",
           type: "number",
-          step: "1000",
+          step: "1",
           min: "0",
         },
         { key: "goods", label: "Goods", type: "number", step: "1", min: "0" },

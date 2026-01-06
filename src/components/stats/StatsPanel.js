@@ -1,4 +1,5 @@
 import React from "react";
+import { formatNumber } from "../../utils.js";
 
 export default function StatsPanel({
   resources,
@@ -44,11 +45,11 @@ export default function StatsPanel({
     >
       <div className="header">Resources</div>
       <div style={{ marginBottom: "12px" }}>
-        <div>Coins: {safeResources.coins}</div>
-        <div>Supplies: {safeResources.supplies}</div>
-        <div>Goods: {safeResources.goods}</div>
-        <div>Shards: {safeResources.shards}</div>
-        <div>Alloy: {safeResources.alloy}</div>
+        <div>Coins: {formatNumber(safeResources.coins)}</div>
+        <div>Supplies: {formatNumber(safeResources.supplies)}</div>
+        <div>Goods: {formatNumber(safeResources.goods)}</div>
+        <div>Shards: {formatNumber(safeResources.shards)}</div>
+        <div>Alloy: {formatNumber(safeResources.alloy)}</div>
         <button
           className="button small"
           onClick={onOpenResourcesDialog}
@@ -60,8 +61,8 @@ export default function StatsPanel({
 
       <div className="header">Stats</div>
       <div style={{ marginBottom: "12px" }}>
-        <div>Population: {safeResources.population}</div>
-        <div>Euphoria: {safeResources.euphoria}</div>
+        <div>Population: {formatNumber(safeResources.population)}</div>
+        <div>Euphoria: {formatNumber(safeResources.euphoria)}</div>
         <div>Coin Boost: {safeResources.coinBoost * 100}%</div>
         <div>Supplies Boost: {safeResources.suppliesBoost * 100}%</div>
         <div>Quantum Actions: {safeResources.quantumActions}</div>
@@ -102,7 +103,7 @@ export default function StatsPanel({
       </div>
 
       <div className="header">Recent Logs</div>
-      <div style={{ maxHeight: "200px", overflowY: "auto", fontSize: "12px" }}>
+      <div style={{ maxHeight: "500px", overflowY: "auto", fontSize: "12px" }}>
         {safeLogs.length === 0 ? (
           <div style={{ color: "#94a3b8", fontStyle: "italic" }}>
             No logs yet
