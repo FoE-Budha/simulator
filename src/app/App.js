@@ -1,14 +1,5 @@
 import React, { useState, useMemo } from "react";
-import {
-  uuid,
-  createLog,
-  createBuildLog,
-  createCollectLog,
-  createSellLog,
-  createUnlockLog,
-  createResourcesLog,
-  createMoveLog,
-} from "../utils";
+import { uuid, createActionLog, mergeLog } from "../utils";
 import PalettePanel from "../components/palette/PalettePanel";
 import MapPanel from "../components/MapPanel";
 import StatsPanel from "../components/stats/StatsPanel";
@@ -132,13 +123,14 @@ export default function App() {
     const result = sim.applyBuild(resources, selectedType);
     if (!result) return;
 
-    const log = createBuildLog(
-      selectedType.name,
-      result.delta,
+    const log = createActionLog(
+      "build",
+      `Built ${selectedType.name}`,
       result.resources,
-      { x, y }
+      result.delta,
+      { coordinates: { x, y } }
     );
-    setLogs((prev) => createLog(log, prev));
+    setLogs((prev) => mergeLog(log, prev));
 
     setResources(result.resources);
 
@@ -162,13 +154,14 @@ export default function App() {
       prev.map((building) => {
         if (building.id === buildingId) {
           // Create a log for the move
-          const log = createMoveLog(
-            building.name,
-            { x: building.x, y: building.y },
-            { x: newX, y: newY },
-            resources
+          const log = createActionLog(
+            "move",
+            `Moved ${building.name}`,
+            resources,
+            {}, // No delta for move
+            { from: { x: building.x, y: building.y }, to: { x: newX, y: newY } }
           );
-          setLogs((prev) => createLog(log, prev));
+          setLogs((prev) => mergeLog(log, prev));
 
           // Update building position
           return {
@@ -191,8 +184,14 @@ export default function App() {
     if (!result) return;
 
     // 2. THEN create log
-    const log = createCollectLog(building.name, result.delta, result.resources);
-    setLogs((prev) => createLog(log, prev));
+    const log = createActionLog(
+      "collect",
+      `Collected from ${building.name}`,
+      result.resources,
+      result.delta,
+      { building: building.name }
+    );
+    setLogs((prev) => mergeLog(log, prev));
 
     // 3. Update state
     setResources(result.resources);
@@ -207,8 +206,14 @@ export default function App() {
     if (!result) return;
 
     // 2. THEN create log
-    const log = createSellLog(building.name, result.delta, result.resources);
-    setLogs((prev) => createLog(log, prev));
+    const log = createActionLog(
+      "sell",
+      `Sold ${building.name}`,
+      result.resources,
+      result.delta,
+      { building: building.name }
+    );
+    setLogs((prev) => mergeLog(log, prev));
 
     // 3. Update state
     setResources(result.resources);
@@ -260,13 +265,14 @@ export default function App() {
     }));
 
     // Add log
-    const log = createUnlockLog(
-      chunkKey,
-      { [type]: amount },
+    const log = createActionLog(
+      "unlock",
+      `Unlocked expansion with ${type}`,
       { ...resources, [type]: resources[type] - amount },
-      unlockCounts[type] + 1
+      { [type]: -amount }, // Negative delta (cost)
+      { chunk: chunkKey, unlockNumber: unlockCounts[type] + 1 }
     );
-    setLogs((prev) => createLog(log, prev));
+    setLogs((prev) => mergeLog(log, prev));
 
     setChunkDialog(null);
   };
@@ -307,8 +313,14 @@ export default function App() {
       ...newResources,
     }));
 
-    const log = createResourcesLog({ ...resources, ...newResources });
-    setLogs((prev) => createLog(log, prev));
+    const log = createActionLog(
+      "resources",
+      "Updated resources",
+      { ...resources, ...newResources },
+      {}, // No delta shown for manual updates
+      { action: "manual_update" }
+    );
+    setLogs((prev) => mergeLog(log, prev));
   };
 
   // -----------------------------

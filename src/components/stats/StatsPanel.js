@@ -113,86 +113,57 @@ export default function StatsPanel({
             let logColor = "#94a3b8";
             if (log.type === "build") logColor = "#06b6d4";
             else if (log.type === "collect") logColor = "#10b981";
-            else if (log.type === "sell") logColor = "#f59e0b";
-
-            // Helper to format resources without zeros
-            const formatResources = (resources) => {
-              const parts = [];
-              if (resources?.coins && resources.coins !== 0)
-                parts.push(`${resources.coins} coins`);
-              if (resources?.supplies && resources.supplies !== 0)
-                parts.push(`${resources.supplies} supplies`);
-              if (resources?.alloy && resources.alloy !== 0)
-                parts.push(`${resources.alloy} alloy`);
-              return parts.join(", ") || "0 resources";
-            };
-            // Format delta (cost/yield/refund) without zeros
-            const formatDelta = (delta, prefix = "") => {
-              const parts = [];
-              if (delta?.coins && delta.coins !== 0) {
-                const sign = delta.coins > 0 ? "+" : "";
-                parts.push(`${sign}${delta.coins} coins`);
-              }
-              if (delta?.supplies && delta.supplies !== 0) {
-                const sign = delta.supplies > 0 ? "+" : "";
-                parts.push(`${sign}${delta.supplies} supplies`);
-              }
-              if (delta?.alloy && delta.alloy !== 0) {
-                const sign = delta.alloy > 0 ? "+" : "";
-                parts.push(`${sign}${delta.alloy} alloy`);
-              }
-              return parts.length > 0 ? `${prefix}${parts.join(", ")}` : "";
-            };
+            else if (log.type === "sell") logColor = "#FF2400";
+            else if (log.type === "unlock") logColor = "#8b5cf6";
+            else if (log.type === "move") logColor = "#64748b";
+            else if (log.type === "resources") logColor = "#64748b";
 
             return (
               <div
                 key={log.id || idx}
                 style={{
-                  marginBottom: "4px",
-                  color: logColor,
-                  padding: "4px",
+                  marginBottom: "8px",
+                  padding: "6px",
                   background: "rgba(255,255,255,0.02)",
                   borderRadius: "4px",
                   borderLeft: `3px solid ${logColor}`,
                 }}
               >
+                {/* Header with count (already formatted in log.message) */}
                 <div
                   style={{
-                    fontWeight: "500",
-                    fontSize: log.count > 1 ? "13px" : "12px",
+                    fontWeight: "bold",
+                    color: logColor,
+                    fontSize: "13px",
+                    marginBottom: "2px",
                   }}
                 >
-                  {log.count > 1 ? `(${log.count}) ` : ""}
                   {log.message || "Unknown event"}
                 </div>
 
-                {/* Show current resources after the action */}
-                <div
-                  style={{ fontSize: "11px", opacity: 0.7, marginTop: "2px" }}
-                >
-                  {formatResources(log.resources)}
-                </div>
+                {/* Resources (already formatted in log.formattedResources) */}
+                {log.formattedResources && (
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#94a3b8",
+                      marginBottom: log.formattedDetail ? "2px" : "0",
+                    }}
+                  >
+                    {log.formattedResources}
+                  </div>
+                )}
 
-                {/* Show delta changes without zero values */}
-                {log.details?.cost && (
+                {/* Detail (Cost/Yield/Refund - already formatted) */}
+                {log.formattedDetail && (
                   <div
-                    style={{ fontSize: "10px", opacity: 0.6, marginTop: "1px" }}
+                    style={{
+                      fontSize: "10px",
+                      color: "#64748b",
+                      fontStyle: "italic",
+                    }}
                   >
-                    {formatDelta(log.details.cost, "Cost: ")}
-                  </div>
-                )}
-                {log.details?.yield && (
-                  <div
-                    style={{ fontSize: "10px", opacity: 0.6, marginTop: "1px" }}
-                  >
-                    {formatDelta(log.details.yield, "Yield: ")}
-                  </div>
-                )}
-                {log.details?.refund && (
-                  <div
-                    style={{ fontSize: "10px", opacity: 0.6, marginTop: "1px" }}
-                  >
-                    {formatDelta(log.details.refund, "Refund: ")}
+                    {log.formattedDetail}
                   </div>
                 )}
               </div>
