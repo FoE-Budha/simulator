@@ -1,6 +1,14 @@
 import React, { useState, useMemo } from "react";
-import { uuid } from "../utils";
-
+import {
+  uuid,
+  createLog,
+  createBuildLog,
+  createCollectLog,
+  createSellLog,
+  createUnlockLog,
+  createResourcesLog,
+  createMoveLog,
+} from "../utils";
 import PalettePanel from "../components/palette/PalettePanel";
 import MapPanel from "../components/MapPanel";
 import StatsPanel from "../components/stats/StatsPanel";
@@ -124,18 +132,13 @@ export default function App() {
     const result = sim.applyBuild(resources, selectedType);
     if (!result) return;
 
-    const log = {
-      id: uuid("log_"),
-      type: "build",
-      message: `Built ${selectedType.name}`,
-      resources: result.resources,
-      details: {
-        building: selectedType.name,
-        cost: result.delta,
-        coordinates: { x, y }, // Important for merging same-building placements
-      },
-    };
-    addLog(log);
+    const log = createBuildLog(
+      selectedType.name,
+      result.delta,
+      result.resources,
+      { x, y }
+    );
+    setLogs((prev) => createLog(log, prev));
 
     setResources(result.resources);
 
@@ -159,18 +162,13 @@ export default function App() {
       prev.map((building) => {
         if (building.id === buildingId) {
           // Create a log for the move
-          const log = {
-            id: uuid("log_"),
-            type: "move",
-            message: `Moved ${building.name}`,
-            resources: resources,
-            details: {
-              building: building.name,
-              from: { x: building.x, y: building.y },
-              to: { x: newX, y: newY },
-            },
-          };
-          addLog(log);
+          const log = createMoveLog(
+            building.name,
+            { x: building.x, y: building.y },
+            { x: newX, y: newY },
+            resources
+          );
+          setLogs((prev) => createLog(log, prev));
 
           // Update building position
           return {
@@ -193,17 +191,8 @@ export default function App() {
     if (!result) return;
 
     // 2. THEN create log
-    const log = {
-      id: uuid("log_"),
-      type: "collect",
-      message: `Collected from ${building.name}`,
-      resources: result.resources,
-      details: {
-        building: building.name,
-        yield: result.delta,
-      },
-    };
-    addLog(log);
+    const log = createCollectLog(building.name, result.delta, result.resources);
+    setLogs((prev) => createLog(log, prev));
 
     // 3. Update state
     setResources(result.resources);
@@ -218,21 +207,12 @@ export default function App() {
     if (!result) return;
 
     // 2. THEN create log
-    const log = {
-      id: uuid("log_"),
-      type: "sell",
-      message: `Sold ${building.name}`,
-      resources: result.resources,
-      details: {
-        building: building.name,
-        refund: result.delta,
-      },
-    };
+    const log = createSellLog(building.name, result.delta, result.resources);
+    setLogs((prev) => createLog(log, prev));
 
     // 3. Update state
     setResources(result.resources);
     setBuildings((b) => b.filter((x) => x.id !== building.id));
-    addLog(log);
   };
 
   // -----------------------------
@@ -280,20 +260,13 @@ export default function App() {
     }));
 
     // Add log
-    addLog({
-      id: uuid("log_"),
-      type: "unlock",
-      message: `Unlocked expansion with ${amount} ${type}`,
-      resources: {
-        ...resources,
-        [type]: resources[type] - amount,
-      },
-      details: {
-        chunk: chunkKey,
-        cost: { [type]: amount },
-        unlockNumber: unlockCounts[type] + 1,
-      },
-    });
+    const log = createUnlockLog(
+      chunkKey,
+      { [type]: amount },
+      { ...resources, [type]: resources[type] - amount },
+      unlockCounts[type] + 1
+    );
+    setLogs((prev) => createLog(log, prev));
 
     setChunkDialog(null);
   };
@@ -334,51 +307,8 @@ export default function App() {
       ...newResources,
     }));
 
-    addLog({
-      id: uuid("log_"),
-      type: "resources",
-      message: "Manually updated resources",
-      resources: { ...resources, ...newResources },
-      details: { action: "manual_update" },
-    });
-  };
-
-  // -----------------------------
-  // Log Creation
-  // -----------------------------
-  const addLog = (newLog) => {
-    setLogs((prevLogs) => {
-      if (prevLogs.length === 0) {
-        return [{ ...newLog, count: 1 }];
-      }
-
-      const lastLog = prevLogs[prevLogs.length - 1];
-
-      let canMerge = false;
-
-      if (
-        lastLog.type === newLog.type &&
-        lastLog.details?.building === newLog.details?.building
-      ) {
-        canMerge = true;
-      }
-
-      if (canMerge) {
-        const mergedCount = (lastLog.count || 1) + 1;
-        const mergedLog = {
-          ...lastLog,
-          count: mergedCount,
-          resources: newLog.resources,
-          message: `${mergedCount}x ${newLog.message
-            .replace(/^\d+x\s/, "")
-            .replace(/^\(\d+\)\s/, "")}`,
-        };
-
-        return [...prevLogs.slice(0, -1), mergedLog];
-      }
-
-      return [...prevLogs, { ...newLog, count: 1 }];
-    });
+    const log = createResourcesLog({ ...resources, ...newResources });
+    setLogs((prev) => createLog(log, prev));
   };
 
   // -----------------------------
