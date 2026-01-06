@@ -32,7 +32,8 @@ export default function ChunkDialog({ chunk, onClose, onUnlock }) {
 
   // Handle unlock with shards
   const handleShardUnlock = () => {
-    onUnlock({
+    // Pass chunk key (cx,cy) instead of chunk object
+    onUnlock(`${chunk.cx},${chunk.cy}`, {
       type: "shards",
       amount: currentShardPrice,
     });
@@ -44,7 +45,7 @@ export default function ChunkDialog({ chunk, onClose, onUnlock }) {
 
   // Handle unlock with goods
   const handleGoodsUnlock = () => {
-    onUnlock({
+    onUnlock(`${chunk.cx},${chunk.cy}`, {
       type: "goods",
       amount: currentGoodsPrice,
     });

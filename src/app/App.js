@@ -6,6 +6,7 @@ import MapPanel from "../components/MapPanel";
 import StatsPanel from "../components/stats/StatsPanel";
 import ChunkDialog from "../components/dialogs/ChunkDialog";
 import BuildingDialog from "../components/dialogs/BuildingDialog";
+import ResourcesDialog from "../components/dialogs/ResourcesDialog";
 
 import * as sim from "../simulation/simulation";
 import { DEFAULT_PALETTE } from "../data/default_palette";
@@ -19,9 +20,8 @@ const initialResources = {
   supplies: 75000,
   goods: 20,
   alloy: 0,
-  shards: 0,
+  shards: 750,
   quantumActions: 0,
-
   population: 0,
   euphoria: 0,
   coinBoost: 0,
@@ -47,6 +47,8 @@ export default function App() {
   const [logs, setLogs] = useState([]);
   const [snapshots, setSnapshots] = useState([]);
   const [lastCompare, setLastCompare] = useState(null);
+  const [buildingDialog, setBuildingDialog] = useState(null);
+  const [resourcesDialog, setResourcesDialog] = useState(false); // ADD THIS LINE
 
   // -----------------------------
   // DERIVED DATA
@@ -236,6 +238,54 @@ export default function App() {
     setChunkDialog(chunk);
   };
 
+  // FIX: Add chunk unlocking handler
+  const handleUnlockChunk = (chunkKey, unlockData) => {
+    const { type, amount } = unlockData;
+
+    // Check resources
+    if (type === "shards" && resources.shards < amount) {
+      alert(`Need ${amount} shards, only have ${resources.shards}`);
+      return;
+    }
+
+    if (type === "goods" && resources.goods < amount) {
+      alert(`Need ${amount} goods, only have ${resources.goods}`);
+      return;
+    }
+
+    // Update resources
+    setResources((prev) => ({
+      ...prev,
+      [type]: prev[type] - amount,
+    }));
+
+    // Update chunk state
+    setChunksMap((prev) => ({
+      ...prev,
+      [chunkKey]: {
+        ...prev[chunkKey],
+        state: "available",
+      },
+    }));
+
+    // Add log
+    addLog({
+      id: uuid("log_"),
+      type: "unlock",
+      message: `Unlocked chunk with ${amount} ${type}`,
+      resources: {
+        ...resources,
+        [type]: resources[type] - amount,
+      },
+      details: {
+        chunk: chunkKey,
+        cost: { [type]: amount },
+      },
+    });
+
+    setChunkDialog(null);
+  };
+
   const saveSnapshot = (name) => {
     setSnapshots((s) => [
       ...s,
@@ -265,47 +315,56 @@ export default function App() {
     });
   };
 
+  // Manual resource update handler
+  const handleUpdateResources = (newResources) => {
+    setResources((prev) => ({
+      ...prev,
+      ...newResources,
+    }));
+
+    addLog({
+      id: uuid("log_"),
+      type: "resources",
+      message: "Manually updated resources",
+      resources: { ...resources, ...newResources },
+      details: { action: "manual_update" },
+    });
+  };
+
   // -----------------------------
   // Log Creation
   // -----------------------------
   const addLog = (newLog) => {
     setLogs((prevLogs) => {
-      // If no logs yet, just add the new one
       if (prevLogs.length === 0) {
         return [{ ...newLog, count: 1 }];
       }
 
       const lastLog = prevLogs[prevLogs.length - 1];
 
-      // Check if we can merge with the last log
       let canMerge = false;
 
       if (
         lastLog.type === newLog.type &&
         lastLog.details?.building === newLog.details?.building
       ) {
-        // Merge all types: build, collect, and sell
         canMerge = true;
       }
 
       if (canMerge) {
-        // Merge logs
         const mergedCount = (lastLog.count || 1) + 1;
         const mergedLog = {
           ...lastLog,
           count: mergedCount,
-          resources: newLog.resources, // Update to latest resources
-          // Clean message - remove any existing count prefix
+          resources: newLog.resources,
           message: `${mergedCount}x ${newLog.message
             .replace(/^\d+x\s/, "")
             .replace(/^\(\d+\)\s/, "")}`,
         };
 
-        // Replace last log with merged one
         return [...prevLogs.slice(0, -1), mergedLog];
       }
 
-      // Can't merge, add as new log
       return [...prevLogs, { ...newLog, count: 1 }];
     });
   };
@@ -314,10 +373,6 @@ export default function App() {
   // Building Menu
   // -----------------------------
 
-  // Add this to your state in App.js:
-  const [buildingDialog, setBuildingDialog] = useState(null); // null | {building: null} for new | {building: object} for edit
-
-  // Open dialog for new building:
   const handleCreateBuilding = () => {
     setBuildingDialog({ building: null });
   };
@@ -327,7 +382,7 @@ export default function App() {
   };
 
   const handleSaveBuilding = (buildingData, group) => {
-    if (buildingDialog.building) {
+    if (buildingDialog?.building) {
       // Edit existing building
       setPaletteGroups((prev) => {
         const newGroups = { ...prev };
@@ -400,16 +455,14 @@ export default function App() {
         lastCompare={lastCompare}
         saveSnapshot={saveSnapshot}
         compareSnapshot={compareSnapshot}
+        onOpenResourcesDialog={() => setResourcesDialog(true)}
       />
 
       {chunkDialog && (
         <ChunkDialog
           chunk={chunkDialog}
           onClose={() => setChunkDialog(null)}
-          onUnlock={(type) => {
-            console.log("Unlock with:", type);
-            setChunkDialog(null);
-          }}
+          onUnlock={handleUnlockChunk}
         />
       )}
 
@@ -419,6 +472,14 @@ export default function App() {
           onSave={handleSaveBuilding}
           onClose={handleCloseBuildingDialog}
           paletteGroups={paletteGroups}
+        />
+      )}
+
+      {resourcesDialog && (
+        <ResourcesDialog
+          resources={resources}
+          onSave={handleUpdateResources}
+          onClose={() => setResourcesDialog(false)}
         />
       )}
     </div>
