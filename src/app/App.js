@@ -20,7 +20,7 @@ const initialResources = {
   supplies: 75000,
   goods: 20,
   alloy: 0,
-  shards: 750,
+  shards: 500,
   quantumActions: 0,
   population: 0,
   euphoria: 0,
@@ -48,7 +48,8 @@ export default function App() {
   const [snapshots, setSnapshots] = useState([]);
   const [lastCompare, setLastCompare] = useState(null);
   const [buildingDialog, setBuildingDialog] = useState(null);
-  const [resourcesDialog, setResourcesDialog] = useState(false); // ADD THIS LINE
+  const [resourcesDialog, setResourcesDialog] = useState(false);
+  const [unlockCounts, setUnlockCounts] = useState({ shards: 0, goods: 0 });
 
   // -----------------------------
   // DERIVED DATA
@@ -234,11 +235,15 @@ export default function App() {
     addLog(log);
   };
 
+  // -----------------------------
+  // Expansion unlock
+  // -----------------------------
+
   const handleChunkClick = (chunk) => {
     setChunkDialog(chunk);
   };
 
-  // FIX: Add chunk unlocking handler
+  // UPDATED: Chunk unlocking with global counters
   const handleUnlockChunk = (chunkKey, unlockData) => {
     const { type, amount } = unlockData;
 
@@ -252,6 +257,12 @@ export default function App() {
       alert(`Need ${amount} goods, only have ${resources.goods}`);
       return;
     }
+
+    // Update GLOBAL unlock counter for this type
+    setUnlockCounts((prev) => ({
+      ...prev,
+      [type]: prev[type] + 1,
+    }));
 
     // Update resources
     setResources((prev) => ({
@@ -272,7 +283,7 @@ export default function App() {
     addLog({
       id: uuid("log_"),
       type: "unlock",
-      message: `Unlocked chunk with ${amount} ${type}`,
+      message: `Unlocked chunk ${chunkKey} with ${amount} ${type}`,
       resources: {
         ...resources,
         [type]: resources[type] - amount,
@@ -280,6 +291,7 @@ export default function App() {
       details: {
         chunk: chunkKey,
         cost: { [type]: amount },
+        unlockNumber: unlockCounts[type] + 1,
       },
     });
 
@@ -461,6 +473,7 @@ export default function App() {
       {chunkDialog && (
         <ChunkDialog
           chunk={chunkDialog}
+          unlockCounts={unlockCounts}
           onClose={() => setChunkDialog(null)}
           onUnlock={handleUnlockChunk}
         />

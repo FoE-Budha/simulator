@@ -1,46 +1,47 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
-export default function ChunkDialog({ chunk, onClose, onUnlock }) {
-  if (!chunk) return null;
-
-  // Track how many unlocks have been made
-  const [unlockCounts, setUnlockCounts] = useState({
-    shards: 0,
-    goods: 0,
-  });
-
-  // Shard pricing progression
+export default function ChunkDialog({
+  chunk,
+  unlockCounts = { shards: 0, goods: 0 }, // Default to 0 if not provided
+  onClose,
+  onUnlock,
+}) {
+  // Pricing arrays (DO NOT MODIFY - these are the progression)
   const shardPrices = [
     100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800,
     850, 900, 950,
   ];
 
-  // Goods pricing progression
   const goodsPrices = [30, 60, 90, 130, 180, 240, 310, 390, 480, 580, 700];
 
-  // Get current prices
+  // Get current prices based on GLOBAL unlock counts
   const getCurrentShardPrice = () => {
-    return shardPrices[Math.min(unlockCounts.shards, shardPrices.length - 1)];
+    const count = unlockCounts.shards || 0;
+    // If we've exceeded the array, use the last price
+    return count >= shardPrices.length
+      ? shardPrices[shardPrices.length - 1]
+      : shardPrices[count];
   };
 
   const getCurrentGoodsPrice = () => {
-    return goodsPrices[Math.min(unlockCounts.goods, goodsPrices.length - 1)];
+    const count = unlockCounts.goods || 0;
+    // If we've exceeded the array, use the last price
+    return count >= goodsPrices.length
+      ? goodsPrices[goodsPrices.length - 1]
+      : goodsPrices[count];
   };
 
   const currentShardPrice = getCurrentShardPrice();
   const currentGoodsPrice = getCurrentGoodsPrice();
+  const nextShardUnlockNumber = (unlockCounts.shards || 0) + 1;
+  const nextGoodsUnlockNumber = (unlockCounts.goods || 0) + 1;
 
   // Handle unlock with shards
   const handleShardUnlock = () => {
-    // Pass chunk key (cx,cy) instead of chunk object
     onUnlock(`${chunk.cx},${chunk.cy}`, {
       type: "shards",
       amount: currentShardPrice,
     });
-    setUnlockCounts((prev) => ({
-      ...prev,
-      shards: prev.shards + 1,
-    }));
   };
 
   // Handle unlock with goods
@@ -49,19 +50,10 @@ export default function ChunkDialog({ chunk, onClose, onUnlock }) {
       type: "goods",
       amount: currentGoodsPrice,
     });
-    setUnlockCounts((prev) => ({
-      ...prev,
-      goods: prev.goods + 1,
-    }));
   };
 
-  // Initialize counts
-  useEffect(() => {
-    setUnlockCounts({ shards: 0, goods: 0 });
-  }, [chunk]);
-
   // Escape key to close
-  useEffect(() => {
+  React.useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") onClose();
     };
@@ -87,100 +79,156 @@ export default function ChunkDialog({ chunk, onClose, onUnlock }) {
     >
       <div
         style={{
-          background: "#2a2a2a",
+          background: "#0b1220",
           padding: "20px",
           borderRadius: "8px",
-          minWidth: "300px",
-          border: "1px solid #444",
+          minWidth: "350px",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 style={{ marginTop: 0, marginBottom: "15px" }}>
+        <h3 style={{ marginTop: 0, marginBottom: "15px", color: "#e6eef8" }}>
           Chunk ({chunk.cx}, {chunk.cy})
         </h3>
 
-        <div style={{ marginBottom: "20px", color: "#aaa" }}>
+        <div style={{ marginBottom: "20px", color: "#94a3b8" }}>
           This chunk is locked. Unlock it to build here.
         </div>
 
         {/* Shards Option */}
-        <div style={{ marginBottom: "15px" }}>
-          <div style={{ marginBottom: "8px" }}>
-            <strong>Unlock with Shards</strong>
+        <div style={{ marginBottom: "20px" }}>
+          <div
+            style={{
+              marginBottom: "8px",
+              color: "#06b6d4",
+              fontWeight: "bold",
+            }}
+          >
+            Unlock with Shards
           </div>
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              marginBottom: "10px",
+              marginBottom: "12px",
+              color: "#cbd5e1",
+              fontSize: "14px",
             }}
           >
-            <span>Cost: {currentShardPrice} Shards</span>
-            <span>Unlock #{unlockCounts.shards + 1}</span>
+            <span>
+              Cost:{" "}
+              <strong style={{ color: "#06b6d4" }}>{currentShardPrice}</strong>{" "}
+              Shards
+            </span>
+            <span>Unlock #{nextShardUnlockNumber}</span>
           </div>
           <button
             style={{
               width: "100%",
-              padding: "10px",
-              background: "#667eea",
-              color: "white",
+              padding: "12px",
+              background: "#06b6d4",
+              color: "#021827",
               border: "none",
-              borderRadius: "4px",
+              borderRadius: "6px",
               cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "14px",
+              transition: "background 0.2s",
             }}
             onClick={handleShardUnlock}
+            onMouseOver={(e) => (e.target.style.background = "#0dc7e0")}
+            onMouseOut={(e) => (e.target.style.background = "#06b6d4")}
           >
             Unlock with Shards
           </button>
+          {unlockCounts.shards > 0 && (
+            <div
+              style={{ fontSize: "12px", color: "#64748b", marginTop: "6px" }}
+            >
+              Already unlocked {unlockCounts.shards} chunk(s) with shards
+            </div>
+          )}
         </div>
 
         {/* Goods Option */}
-        <div style={{ marginBottom: "20px" }}>
-          <div style={{ marginBottom: "8px" }}>
-            <strong>Clear with Goods</strong>
+        <div style={{ marginBottom: "25px" }}>
+          <div
+            style={{
+              marginBottom: "8px",
+              color: "#10b981",
+              fontWeight: "bold",
+            }}
+          >
+            Clear with Goods
           </div>
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              marginBottom: "10px",
+              marginBottom: "12px",
+              color: "#cbd5e1",
+              fontSize: "14px",
             }}
           >
-            <span>Cost: {currentGoodsPrice} Goods</span>
-            <span>Clear #{unlockCounts.goods + 1}</span>
+            <span>
+              Cost:{" "}
+              <strong style={{ color: "#10b981" }}>{currentGoodsPrice}</strong>{" "}
+              Goods
+            </span>
+            <span>Clear #{nextGoodsUnlockNumber}</span>
           </div>
           <button
             style={{
               width: "100%",
-              padding: "10px",
-              background: "#4CAF50",
-              color: "white",
+              padding: "12px",
+              background: "#10b981",
+              color: "#021827",
               border: "none",
-              borderRadius: "4px",
+              borderRadius: "6px",
               cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "14px",
+              transition: "background 0.2s",
             }}
             onClick={handleGoodsUnlock}
+            onMouseOver={(e) => (e.target.style.background = "#34d399")}
+            onMouseOut={(e) => (e.target.style.background = "#10b981")}
           >
             Clear with Goods
           </button>
+          {unlockCounts.goods > 0 && (
+            <div
+              style={{ fontSize: "12px", color: "#64748b", marginTop: "6px" }}
+            >
+              Already cleared {unlockCounts.goods} chunk(s) with goods
+            </div>
+          )}
         </div>
 
         {/* Progression Info */}
         <div
           style={{
-            fontSize: "0.9em",
-            color: "#888",
+            fontSize: "13px",
+            color: "#94a3b8",
             marginBottom: "20px",
-            padding: "10px",
+            padding: "12px",
             background: "rgba(255,255,255,0.05)",
-            borderRadius: "4px",
+            borderRadius: "6px",
+            border: "1px solid rgba(255,255,255,0.1)",
           }}
         >
-          <div>
-            Shards unlocks: {unlockCounts.shards} (next: {currentShardPrice})
+          <div style={{ marginBottom: "6px" }}>
+            <strong>Price Progression:</strong>
           </div>
-          <div>
-            Goods clears: {unlockCounts.goods} (next: {currentGoodsPrice})
+          <div style={{ marginBottom: "4px" }}>
+            Shards: {shardPrices.slice(0, 5).join(" → ")}...
+          </div>
+          <div>Goods: {goodsPrices.slice(0, 5).join(" → ")}...</div>
+          <div
+            style={{ marginTop: "8px", fontSize: "12px", fontStyle: "italic" }}
+          >
+            Prices increase independently for each resource type
           </div>
         </div>
 
@@ -188,13 +236,18 @@ export default function ChunkDialog({ chunk, onClose, onUnlock }) {
           <button
             style={{
               padding: "8px 16px",
-              background: "#555",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
+              background: "rgba(255,255,255,0.1)",
+              color: "#e6eef8",
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: "6px",
               cursor: "pointer",
+              fontSize: "14px",
             }}
             onClick={onClose}
+            onMouseOver={(e) =>
+              (e.target.background = "rgba(255,255,255,0.15)")
+            }
+            onMouseOut={(e) => (e.target.background = "rgba(255,255,255,0.1)")}
           >
             Close
           </button>
