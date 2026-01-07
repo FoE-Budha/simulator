@@ -62,6 +62,10 @@
   pointer-events: none; /* Don't interfere with clicks */
 }
 
+.building.movable {
+  pointer-events: none;
+}
+
 /* Make sure existing buildings are above hover */
 .building {
   position: absolute;

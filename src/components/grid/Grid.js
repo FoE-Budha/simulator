@@ -16,14 +16,14 @@ export default function Grid({
   onChunkAction,
 }) {
   const [hoverPosition, setHoverPosition] = useState(null);
-  
+
   // Always call hooks at the top level, unconditionally
   const keys = Object.keys(chunksMap);
-  
+
   // Calculate availableChunks unconditionally
   const availableChunks = useMemo(() => {
     const chunks = {};
-    Object.values(chunksMap).forEach(chunk => {
+    Object.values(chunksMap).forEach((chunk) => {
       if (chunk.state === "available") {
         chunks[`${chunk.cx},${chunk.cy}`] = true;
       }
@@ -35,11 +35,13 @@ export default function Grid({
   if (!keys.length) {
     return (
       <div className="grid-container">
-        <div style={{ 
-          padding: "40px", 
-          textAlign: "center", 
-          color: "#94a3b8" 
-        }}>
+        <div
+          style={{
+            padding: "40px",
+            textAlign: "center",
+            color: "#94a3b8",
+          }}
+        >
           No chunks available
         </div>
       </div>
@@ -70,7 +72,7 @@ export default function Grid({
   // Helper function to get all chunks a building occupies
   function getChunksForBuilding(globalX, globalY, width, height) {
     const chunks = new Set();
-    
+
     for (let x = globalX; x < globalX + width; x++) {
       for (let y = globalY; y < globalY + height; y++) {
         const chunkX = Math.floor(x / 4);
@@ -78,8 +80,8 @@ export default function Grid({
         chunks.add(`${chunkX},${chunkY}`);
       }
     }
-    
-    return Array.from(chunks).map(str => {
+
+    return Array.from(chunks).map((str) => {
       const [cx, cy] = str.split(",").map(Number);
       return [cx, cy];
     });
@@ -105,11 +107,16 @@ export default function Grid({
       // Check if building fits
       if (rx + selected.w > 4 || ry + selected.h > 4) {
         // Check multi-chunk placement
-        const buildingChunks = getChunksForBuilding(globalX, globalY, selected.w, selected.h);
-        const allChunksAvailable = buildingChunks.every(([chunkX, chunkY]) => 
-          availableChunks[`${chunkX},${chunkY}`]
+        const buildingChunks = getChunksForBuilding(
+          globalX,
+          globalY,
+          selected.w,
+          selected.h
         );
-        
+        const allChunksAvailable = buildingChunks.every(
+          ([chunkX, chunkY]) => availableChunks[`${chunkX},${chunkY}`]
+        );
+
         if (!allChunksAvailable) {
           console.log("Building doesn't fit in available chunks");
           return;
@@ -126,32 +133,50 @@ export default function Grid({
       }
 
       onPlace(globalX, globalY);
-      
     } else if (mode === "move" && selectedForMove) {
-      // Moving a building to new location
-      const area = { x: globalX, y: globalY, w: selectedForMove.w, h: selectedForMove.h };
-      
+      console.log("Attempting to move building to:", { globalX, globalY });
+      console.log("Selected building info:", selectedForMove);
+
+      const area = {
+        x: globalX,
+        y: globalY,
+        w: selectedForMove.w,
+        h: selectedForMove.h,
+      };
+
       // Check collision with other buildings (excluding the one being moved)
       for (const b of buildings) {
-        if (b.id === selectedForMove.id) continue;
+        if (b.id === selectedForMove.id) {
+          console.log("Skipping self:", b.id);
+          continue;
+        }
+
         const bArea = { x: b.x, y: b.y, w: b.w, h: b.h };
+        console.log("Checking against building:", b, "Area:", bArea);
+
         if (rectsOverlap(area, bArea)) {
+          console.log("COLLISION DETECTED with building:", b.id);
           console.log("Cannot move here - collision with existing building");
           return;
         }
       }
-      
+
       // Check if all chunks under the building are available
-      const buildingChunks = getChunksForBuilding(globalX, globalY, selectedForMove.w, selectedForMove.h);
-      const allChunksAvailable = buildingChunks.every(([chunkX, chunkY]) => 
-        availableChunks[`${chunkX},${chunkY}`]
+      const buildingChunks = getChunksForBuilding(
+        globalX,
+        globalY,
+        selectedForMove.w,
+        selectedForMove.h
       );
-      
+      const allChunksAvailable = buildingChunks.every(
+        ([chunkX, chunkY]) => availableChunks[`${chunkX},${chunkY}`]
+      );
+
       if (!allChunksAvailable) {
         console.log("Cannot move here - chunks not available");
         return;
       }
-      
+
       onPlace(globalX, globalY);
     }
   }
@@ -161,32 +186,37 @@ export default function Grid({
       setHoverPosition(null);
       return;
     }
-  
+
     const cell = e.target.dataset.cell;
     if (!cell) {
       setHoverPosition(null);
       return;
     }
-  
+
     const [cx, cy, rx, ry] = cell.split(",").map(Number);
     const globalX = cx * 4 + rx;
     const globalY = cy * 4 + ry;
-  
+
     // Show hover preview based on mode
     if (mode === "place" && selected) {
       // Check if building fits within available chunks (multi-chunk check)
-      const buildingChunks = getChunksForBuilding(globalX, globalY, selected.w, selected.h);
-      const allChunksAvailable = buildingChunks.every(([chunkX, chunkY]) => 
-        availableChunks[`${chunkX},${chunkY}`]
+      const buildingChunks = getChunksForBuilding(
+        globalX,
+        globalY,
+        selected.w,
+        selected.h
       );
-      
+      const allChunksAvailable = buildingChunks.every(
+        ([chunkX, chunkY]) => availableChunks[`${chunkX},${chunkY}`]
+      );
+
       if (!allChunksAvailable) {
         setHoverPosition(null);
         return;
       }
-  
+
       const area = { x: globalX, y: globalY, w: selected.w, h: selected.h };
-  
+
       // Check collision with existing buildings
       for (const b of buildings) {
         const bArea = { x: b.x, y: b.y, w: b.w, h: b.h };
@@ -195,23 +225,37 @@ export default function Grid({
           return;
         }
       }
-  
-      setHoverPosition({ x: globalX, y: globalY, w: selected.w, h: selected.h });
-      
+
+      setHoverPosition({
+        x: globalX,
+        y: globalY,
+        w: selected.w,
+        h: selected.h,
+      });
     } else if (mode === "move" && selectedForMove) {
       // Show move preview
-      const buildingChunks = getChunksForBuilding(globalX, globalY, selectedForMove.w, selectedForMove.h);
-      const allChunksAvailable = buildingChunks.every(([chunkX, chunkY]) => 
-        availableChunks[`${chunkX},${chunkY}`]
+      const buildingChunks = getChunksForBuilding(
+        globalX,
+        globalY,
+        selectedForMove.w,
+        selectedForMove.h
       );
-      
+      const allChunksAvailable = buildingChunks.every(
+        ([chunkX, chunkY]) => availableChunks[`${chunkX},${chunkY}`]
+      );
+
       if (!allChunksAvailable) {
         setHoverPosition(null);
         return;
       }
-      
-      const area = { x: globalX, y: globalY, w: selectedForMove.w, h: selectedForMove.h };
-      
+
+      const area = {
+        x: globalX,
+        y: globalY,
+        w: selectedForMove.w,
+        h: selectedForMove.h,
+      };
+
       // Check collision
       for (const b of buildings) {
         if (b.id === selectedForMove.id) continue;
@@ -221,13 +265,13 @@ export default function Grid({
           return;
         }
       }
-      
-      setHoverPosition({ 
-        x: globalX, 
-        y: globalY, 
-        w: selectedForMove.w, 
+
+      setHoverPosition({
+        x: globalX,
+        y: globalY,
+        w: selectedForMove.w,
         h: selectedForMove.h,
-        isMove: true 
+        isMove: true,
       });
     } else {
       setHoverPosition(null);
@@ -241,27 +285,24 @@ export default function Grid({
   // Determine building CSS class based on mode
   const getBuildingClass = (building) => {
     const baseClass = "building";
-    
+
     if (mode === "move" && selectedForMove?.id === building.id) {
-      return `${baseClass} selected-for-move`;
+      return `${baseClass} selected-for-move movable`;
     }
-    
+
     if (mode === "collect") {
       return `${baseClass} collect-mode`;
     }
-    
+
     if (mode === "sell") {
       return `${baseClass} sell-mode`;
     }
-    
+
     return baseClass;
   };
 
   return (
-    <div 
-      className="grid-container"
-      onMouseLeave={handleGridMouseLeave}
-    >
+    <div className="grid-container" onMouseLeave={handleGridMouseLeave}>
       <div
         className="grid-inner"
         style={{
@@ -306,7 +347,9 @@ export default function Grid({
         {/* Hover visualization */}
         {hoverPosition && (
           <div
-            className={`building-hover ${hoverPosition.isMove ? 'move-hover' : ''}`}
+            className={`building-hover ${
+              hoverPosition.isMove ? "move-hover" : ""
+            }`}
             style={{
               left: (hoverPosition.x - minCx * 4) * cellSize,
               top: (hoverPosition.y - minCy * 4) * cellSize,
