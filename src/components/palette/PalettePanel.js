@@ -17,6 +17,7 @@ export default function PalettePanel({
     "goods",
     "army",
     "decorations",
+    "townhall",
   ];
 
   // Load persistent collapse state from storage - collapsed by default

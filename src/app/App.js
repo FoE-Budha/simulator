@@ -199,7 +199,25 @@ export default function App() {
 
   const handleSell = (building) => {
     const buildingType = getBuildingTypeFromPalette(building.typeId);
-    if (!buildingType) return;
+    if (!buildingType || building.typeId === "town hall_1764107877") return;
+
+    // Check if selling would drop population below 0
+    const populationEffect = buildingType.population || 0;
+
+    // If this building provides population (positive effect),
+    // check if removing it would drop below zero
+    if (populationEffect > 0) {
+      const newPopulation = resources.population - populationEffect;
+      if (newPopulation < 0) {
+        alert(
+          `Cannot sell ${buildingType.name}!\n\n` +
+            `This building provides ${populationEffect} population.\n` +
+            `Selling it would reduce your population to ${newPopulation}.\n` +
+            `You must have at least 0 population.`
+        );
+        return;
+      }
+    }
 
     // 1. FIRST get the result
     const result = sim.applySell(resources, buildingType);
