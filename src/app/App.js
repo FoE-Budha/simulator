@@ -125,7 +125,7 @@ export default function App() {
     // Add time skip log
     const log = createActionLog(
       "time",
-      `Advanced time by ${hours} hours`,
+      `Wait for ${hours} hours`,
       resources,
       {},
       { hours: hours, newGameTime: gameTime + hours }
@@ -601,6 +601,10 @@ export default function App() {
         onSell={handleSell}
         onMove={handleMoveBuilding}
         setChunksMap={setChunksMap}
+        gameTime={gameTime}
+        skipTime={skipTime}
+        collectAllReady={collectAllReady}
+        readyToCollectCount={readyToCollectCount}
       />
 
       <StatsPanel

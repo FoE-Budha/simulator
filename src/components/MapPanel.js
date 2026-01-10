@@ -375,23 +375,6 @@ export default function MapPanel({
             ⏩⏩ Wait 10h
           </button>
 
-          <button
-            className="button small"
-            onClick={() => skipTime && skipTime(24)}
-            style={{
-              flex: 1,
-              background: "rgba(139, 92, 246, 0.2)",
-              border: "1px solid #8b5cf6",
-              color: "#8b5cf6",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "4px",
-            }}
-          >
-            ⏩⏩⏩ Wait 24h
-          </button>
-
           {/* Collect All Button */}
           {readyToCollectCount > 0 && (
             <button

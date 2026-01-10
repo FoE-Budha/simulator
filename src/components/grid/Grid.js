@@ -99,9 +99,9 @@ export default function Grid({
   const getBuildingColor = (status) => {
     switch (status.type) {
       case "constructing":
-        return "#f59e0b"; // Amber for construction
+        return "#D9DDDC"; // Gray for construction
       case "producing":
-        return "#06b6d4"; // Cyan for production
+        return "#88E788"; // Cyan for production
       case "ready":
         return "#10b981"; // Green for ready
       default:
@@ -515,34 +515,6 @@ export default function Grid({
                 {b.name}
               </div>
 
-              {/* Status label */}
-              <div
-                style={{
-                  fontSize: Math.max(
-                    8,
-                    Math.min(10, (10 / Math.max(b.w, b.h)) * 1.5)
-                  ),
-                  color: buildingColor,
-                  fontWeight: "bold",
-                  marginBottom: "1px",
-                }}
-              >
-                {status.label}
-              </div>
-
-              {/* Hours display */}
-              <HoursDisplay building={b} status={status} />
-
-              {/* Progress bar */}
-              {(status.type === "constructing" ||
-                status.type === "producing") && (
-                <ProgressBar
-                  progress={status.progress}
-                  color={buildingColor}
-                  height={3}
-                />
-              )}
-
               {/* Move indicator */}
               {mode === "move" && selectedForMove?.id === b.id && (
                 <div className="move-indicator">✓</div>
@@ -567,7 +539,7 @@ export default function Grid({
                   {status.type === "producing" && (
                     <span>⚙️ {status.hoursLeft}h</span>
                   )}
-                  {status.type === "ready" && <span>💰 Ready!</span>}
+                  {status.type === "ready" && <span>Ready!</span>}
                 </div>
               )}
             </div>
