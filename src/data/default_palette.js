@@ -20,6 +20,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours for all buildings
     },
   ],
   residential: [
@@ -43,6 +45,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "frame house_1764107877",
@@ -64,6 +68,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "clapboard house_1764107877",
@@ -85,6 +91,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "mansion_1764107877",
@@ -106,6 +114,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "brownstone house_1764107877",
@@ -127,6 +137,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "town house_1764107877",
@@ -148,6 +160,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "estate house_1764107877",
@@ -169,6 +183,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "apartment house_1764107877",
@@ -190,6 +206,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "manor_1764107877",
@@ -211,6 +229,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
     },
   ],
   production: [
@@ -234,6 +254,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "shoemaker_1764107877",
@@ -255,6 +277,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "bakery_1764107877",
@@ -276,6 +300,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "farm_1764107877",
@@ -297,6 +323,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "alchemist_1764107877",
@@ -318,6 +346,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "windmill_1764107877",
@@ -339,6 +369,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "brewery_1764107877",
@@ -360,6 +392,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "spice trader_1764107877",
@@ -381,6 +415,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "cooperage_1764107877",
@@ -402,6 +438,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
     },
   ],
   goods: [
@@ -425,6 +463,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // No tier but default to T2 (1 hour)
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "copper foundry_1764107877",
@@ -446,6 +486,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // No tier but default to T2 (1 hour)
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "brickworks_1764107877",
@@ -467,6 +509,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // No tier but default to T2 (1 hour)
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "ropery_1764107877",
@@ -488,6 +532,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // No tier but default to T2 (1 hour)
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "gunpowder manufactory_1764107877",
@@ -509,6 +555,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // No tier but default to T2 (1 hour)
+      productionTime: 36000000, // 10 hours
     },
   ],
   cultural: [
@@ -532,6 +580,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 50.0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "gallows_1764107877",
@@ -553,6 +603,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 60.0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "pillory_1764107877",
@@ -574,6 +626,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 120.0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "church_1764107877",
@@ -595,6 +649,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 50.0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "printer_1764107877",
@@ -616,6 +672,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 130.0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "doctor_1764107877",
@@ -637,6 +695,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 260.0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "palace_1764107877",
@@ -658,6 +718,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 90.0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "library_1764107877",
@@ -679,6 +741,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 200.0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "cartographer_1764107877",
@@ -700,197 +764,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 180.0,
-    },
-  ],
-  decorations: [
-    {
-      id: "cypress_1764107877",
-      name: "Cypress",
-      w: 1,
-      h: 1,
-      tier: null,
-      group: "decorations",
-      cost_coins: 50000.0,
-      cost_supplies: 50000.0,
-      cost_alloy: 200.0,
-      produces_coins: 0,
-      produces_supplies: 0,
-      produces_alloy: 0,
-      population: 0,
-      euphoria: -25.0,
-      coin_boost: 0,
-      supplies_boost: 0,
-      attack: 0.1,
-      defense: 0,
-      quantum_actions: 0,
-    },
-    {
-      id: "hedge with flowers_1764107877",
-      name: "Hedge with Flowers",
-      w: 1,
-      h: 1,
-      tier: null,
-      group: "decorations",
-      cost_coins: 50000.0,
-      cost_supplies: 50000.0,
-      cost_alloy: 200.0,
-      produces_coins: 0,
-      produces_supplies: 0,
-      produces_alloy: 0,
-      population: 0,
-      euphoria: -25.0,
-      coin_boost: 0,
-      supplies_boost: 0,
-      attack: 0,
-      defense: 0.1,
-      quantum_actions: 0,
-    },
-    {
-      id: "pond_1764107877",
-      name: "Pond",
-      w: 2,
-      h: 2,
-      tier: null,
-      group: "decorations",
-      cost_coins: 200000.0,
-      cost_supplies: 200000.0,
-      cost_alloy: 750.0,
-      produces_coins: 0,
-      produces_supplies: 0,
-      produces_alloy: 0,
-      population: 0,
-      euphoria: -75.0,
-      coin_boost: 0,
-      supplies_boost: 0,
-      attack: 0.25,
-      defense: 0.25,
-      quantum_actions: 0,
-    },
-    {
-      id: "signpost_1764107877",
-      name: "Signpost",
-      w: 1,
-      h: 1,
-      tier: null,
-      group: "decorations",
-      cost_coins: 75000.0,
-      cost_supplies: 62500.0,
-      cost_alloy: 200.0,
-      produces_coins: 0,
-      produces_supplies: 0,
-      produces_alloy: 0,
-      population: 0,
-      euphoria: -25.0,
-      coin_boost: 0,
-      supplies_boost: 0,
-      attack: 0.15,
-      defense: 0,
-      quantum_actions: 0,
-    },
-    {
-      id: "gargoyle_1764107877",
-      name: "Gargoyle",
-      w: 1,
-      h: 1,
-      tier: null,
-      group: "decorations",
-      cost_coins: 75000.0,
-      cost_supplies: 62500.0,
-      cost_alloy: 200.0,
-      produces_coins: 0,
-      produces_supplies: 0,
-      produces_alloy: 0,
-      population: 0,
-      euphoria: -25.0,
-      coin_boost: 0,
-      supplies_boost: 0,
-      attack: 0,
-      defense: 0.15,
-      quantum_actions: 0,
-    },
-    {
-      id: "flag_1764107877",
-      name: "Flag",
-      w: 1,
-      h: 1,
-      tier: null,
-      group: "decorations",
-      cost_coins: 300000.0,
-      cost_supplies: 250000.0,
-      cost_alloy: 750.0,
-      produces_coins: 0,
-      produces_supplies: 0,
-      produces_alloy: 0,
-      population: 0,
-      euphoria: -75.0,
-      coin_boost: 0,
-      supplies_boost: 0,
-      attack: 0.2,
-      defense: 0.2,
-      quantum_actions: 0,
-    },
-    {
-      id: "tower ruin_1764107877",
-      name: "Tower Ruin",
-      w: 2,
-      h: 2,
-      tier: null,
-      group: "decorations",
-      cost_coins: 100000.0,
-      cost_supplies: 75000.0,
-      cost_alloy: 200.0,
-      produces_coins: 0,
-      produces_supplies: 0,
-      produces_alloy: 0,
-      population: 0,
-      euphoria: -25.0,
-      coin_boost: 0,
-      supplies_boost: 0,
-      attack: 0.45,
-      defense: 0,
-      quantum_actions: 0,
-    },
-    {
-      id: "group of trees_1764107877",
-      name: "Group of Trees",
-      w: 2,
-      h: 2,
-      tier: null,
-      group: "decorations",
-      cost_coins: 100000.0,
-      cost_supplies: 75000.0,
-      cost_alloy: 200.0,
-      produces_coins: 0,
-      produces_supplies: 0,
-      produces_alloy: 0,
-      population: 0,
-      euphoria: -25.0,
-      coin_boost: 0,
-      supplies_boost: 0,
-      attack: 0,
-      defense: 0.45,
-      quantum_actions: 0,
-    },
-    {
-      id: "nautical statue_1764107877",
-      name: "Nautical Statue",
-      w: 1,
-      h: 1,
-      tier: null,
-      group: "decorations",
-      cost_coins: 400000.0,
-      cost_supplies: 300000.0,
-      cost_alloy: 750.0,
-      produces_coins: 0,
-      produces_supplies: 0,
-      produces_alloy: 0,
-      population: 0,
-      euphoria: -75.0,
-      coin_boost: 0,
-      supplies_boost: 0,
-      attack: 0.3,
-      defense: 0.3,
-      quantum_actions: 0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
     },
   ],
   army: [
@@ -914,6 +789,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 0, // T1 = 0 hours
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "trebuchet camp_1764107877",
@@ -935,6 +812,8 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 3600000, // T2 = 1 hour
+      productionTime: 36000000, // 10 hours
     },
     {
       id: "cannon camp_1764107877",
@@ -956,6 +835,217 @@ export const DEFAULT_PALETTE = {
       attack: 0,
       defense: 0,
       quantum_actions: 0,
+      buildTime: 36000000, // T3 = 10 hours
+      productionTime: 36000000, // 10 hours
+    },
+  ],
+  decorations: [
+    {
+      id: "cypress_1764107877",
+      name: "Cypress",
+      w: 1,
+      h: 1,
+      tier: null,
+      group: "decorations",
+      cost_coins: 50000.0,
+      cost_supplies: 50000.0,
+      cost_alloy: 200.0,
+      produces_coins: 0,
+      produces_supplies: 0,
+      produces_alloy: 0,
+      population: 0,
+      euphoria: -25.0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0.1,
+      defense: 0,
+      quantum_actions: 0,
+      buildTime: 0, // default to T1 = 0 seconds
+      productionTime: 0, // No production
+    },
+    {
+      id: "hedge with flowers_1764107877",
+      name: "Hedge with Flowers",
+      w: 1,
+      h: 1,
+      tier: null,
+      group: "decorations",
+      cost_coins: 50000.0,
+      cost_supplies: 50000.0,
+      cost_alloy: 200.0,
+      produces_coins: 0,
+      produces_supplies: 0,
+      produces_alloy: 0,
+      population: 0,
+      euphoria: -25.0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0,
+      defense: 0.1,
+      quantum_actions: 0,
+      buildTime: 0, // default to T1 = 0 seconds
+      productionTime: 0, // No production
+    },
+    {
+      id: "pond_1764107877",
+      name: "Pond",
+      w: 2,
+      h: 2,
+      tier: null,
+      group: "decorations",
+      cost_coins: 200000.0,
+      cost_supplies: 200000.0,
+      cost_alloy: 750.0,
+      produces_coins: 0,
+      produces_supplies: 0,
+      produces_alloy: 0,
+      population: 0,
+      euphoria: -75.0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0.25,
+      defense: 0.25,
+      quantum_actions: 0,
+      buildTime: 0, // default to T1 = 0 seconds
+      productionTime: 0, // No production
+    },
+    {
+      id: "signpost_1764107877",
+      name: "Signpost",
+      w: 1,
+      h: 1,
+      tier: null,
+      group: "decorations",
+      cost_coins: 75000.0,
+      cost_supplies: 62500.0,
+      cost_alloy: 200.0,
+      produces_coins: 0,
+      produces_supplies: 0,
+      produces_alloy: 0,
+      population: 0,
+      euphoria: -25.0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0.15,
+      defense: 0,
+      quantum_actions: 0,
+      buildTime: 0, // default to T1 = 0 seconds
+      productionTime: 0, // No production
+    },
+    {
+      id: "gargoyle_1764107877",
+      name: "Gargoyle",
+      w: 1,
+      h: 1,
+      tier: null,
+      group: "decorations",
+      cost_coins: 75000.0,
+      cost_supplies: 62500.0,
+      cost_alloy: 200.0,
+      produces_coins: 0,
+      produces_supplies: 0,
+      produces_alloy: 0,
+      population: 0,
+      euphoria: -25.0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0,
+      defense: 0.15,
+      quantum_actions: 0,
+      buildTime: 0, // default to T1 = 0 seconds
+      productionTime: 0, // No production
+    },
+    {
+      id: "flag_1764107877",
+      name: "Flag",
+      w: 1,
+      h: 1,
+      tier: null,
+      group: "decorations",
+      cost_coins: 300000.0,
+      cost_supplies: 250000.0,
+      cost_alloy: 750.0,
+      produces_coins: 0,
+      produces_supplies: 0,
+      produces_alloy: 0,
+      population: 0,
+      euphoria: -75.0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0.2,
+      defense: 0.2,
+      quantum_actions: 0,
+      buildTime: 0, // default to T1 = 0 seconds
+      productionTime: 0, // No production
+    },
+    {
+      id: "tower ruin_1764107877",
+      name: "Tower Ruin",
+      w: 2,
+      h: 2,
+      tier: null,
+      group: "decorations",
+      cost_coins: 100000.0,
+      cost_supplies: 75000.0,
+      cost_alloy: 200.0,
+      produces_coins: 0,
+      produces_supplies: 0,
+      produces_alloy: 0,
+      population: 0,
+      euphoria: -25.0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0.45,
+      defense: 0,
+      quantum_actions: 0,
+      buildTime: 0, // default to T1 = 0 seconds
+      productionTime: 0, // No productionn
+    },
+    {
+      id: "group of trees_1764107877",
+      name: "Group of Trees",
+      w: 2,
+      h: 2,
+      tier: null,
+      group: "decorations",
+      cost_coins: 100000.0,
+      cost_supplies: 75000.0,
+      cost_alloy: 200.0,
+      produces_coins: 0,
+      produces_supplies: 0,
+      produces_alloy: 0,
+      population: 0,
+      euphoria: -25.0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0,
+      defense: 0.45,
+      quantum_actions: 0,
+      buildTime: 0, // default to T1 = 0 seconds
+      productionTime: 0, // No production
+    },
+    {
+      id: "nautical statue_1764107877",
+      name: "Nautical Statue",
+      w: 1,
+      h: 1,
+      tier: null,
+      group: "decorations",
+      cost_coins: 400000.0,
+      cost_supplies: 300000.0,
+      cost_alloy: 750.0,
+      produces_coins: 0,
+      produces_supplies: 0,
+      produces_alloy: 0,
+      population: 0,
+      euphoria: -75.0,
+      coin_boost: 0,
+      supplies_boost: 0,
+      attack: 0.3,
+      defense: 0.3,
+      quantum_actions: 0,
+      buildTime: 0, // default to T1 = 0 seconds
+      productionTime: 0, // No production
     },
   ],
 };
