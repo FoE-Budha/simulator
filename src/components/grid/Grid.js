@@ -61,7 +61,70 @@ export default function Grid({
     maxCy = Math.max(maxCy, cy);
   });
 
-  // Rest of the component remains the same...
+  // Helper functions for building status
+  const getBuildingStatus = (building) => {
+    if (building.hoursBuilt < building.buildHoursNeeded) {
+      const progress = Math.round(
+        (building.hoursBuilt / building.buildHoursNeeded) * 100
+      );
+      return {
+        type: "constructing",
+        progress,
+        label: `Building ${progress}%`,
+        hoursLeft: building.buildHoursNeeded - building.hoursBuilt,
+      };
+    }
+
+    if (building.hoursProduced < building.productionHoursNeeded) {
+      const progress = Math.round(
+        (building.hoursProduced / building.productionHoursNeeded) * 100
+      );
+      return {
+        type: "producing",
+        progress,
+        label: `Producing ${progress}%`,
+        hoursLeft: building.productionHoursNeeded - building.hoursProduced,
+      };
+    }
+
+    return {
+      type: "ready",
+      progress: 100,
+      label: "✅ Ready",
+      hoursLeft: 0,
+    };
+  };
+
+  // Get building color based on status
+  const getBuildingColor = (status) => {
+    switch (status.type) {
+      case "constructing":
+        return "#f59e0b"; // Amber for construction
+      case "producing":
+        return "#06b6d4"; // Cyan for production
+      case "ready":
+        return "#10b981"; // Green for ready
+      default:
+        return "#9ae6b4"; // Default green
+    }
+  };
+
+  // Get building background gradient based on status
+  const getBuildingGradient = (status) => {
+    const color = getBuildingColor(status);
+
+    switch (status.type) {
+      case "constructing":
+        return `linear-gradient(180deg, ${color}, ${color}dd)`;
+      case "producing":
+        return `linear-gradient(180deg, ${color}, ${color}dd)`;
+      case "ready":
+        return `linear-gradient(180deg, ${color}, ${color}dd)`;
+      default:
+        return "linear-gradient(180deg, #9ae6b4, #68d391)";
+    }
+  };
+
   const placed = buildings.map((b) => ({
     x: b.x,
     y: b.y,
@@ -134,9 +197,7 @@ export default function Grid({
 
       onPlace(globalX, globalY);
     } else if (mode === "move" && selectedForMove) {
-      console.log("Attempting to move building to:", { globalX, globalY });
-      console.log("Selected building info:", selectedForMove);
-
+      // Moving a building to new location
       const area = {
         x: globalX,
         y: globalY,
@@ -146,16 +207,9 @@ export default function Grid({
 
       // Check collision with other buildings (excluding the one being moved)
       for (const b of buildings) {
-        if (b.id === selectedForMove.id) {
-          console.log("Skipping self:", b.id);
-          continue;
-        }
-
+        if (b.id === selectedForMove.id) continue;
         const bArea = { x: b.x, y: b.y, w: b.w, h: b.h };
-        console.log("Checking against building:", b, "Area:", bArea);
-
         if (rectsOverlap(area, bArea)) {
-          console.log("COLLISION DETECTED with building:", b.id);
           console.log("Cannot move here - collision with existing building");
           return;
         }
@@ -287,7 +341,7 @@ export default function Grid({
     const baseClass = "building";
 
     if (mode === "move" && selectedForMove?.id === building.id) {
-      return `${baseClass} selected-for-move movable`;
+      return `${baseClass} selected-for-move`;
     }
 
     if (mode === "collect") {
@@ -299,6 +353,62 @@ export default function Grid({
     }
 
     return baseClass;
+  };
+
+  // Progress bar component
+  const ProgressBar = ({ progress, color, height = 4 }) => (
+    <div
+      style={{
+        width: "100%",
+        height: `${height}px`,
+        background: "rgba(0,0,0,0.3)",
+        borderRadius: "2px",
+        overflow: "hidden",
+        marginTop: "2px",
+      }}
+    >
+      <div
+        style={{
+          width: `${progress}%`,
+          height: "100%",
+          background: color,
+          transition: "width 0.3s",
+        }}
+      />
+    </div>
+  );
+
+  // Building hours display
+  const HoursDisplay = ({ building, status }) => {
+    if (status.type === "constructing") {
+      return (
+        <div
+          style={{
+            fontSize: "8px",
+            color: "#f59e0b",
+            marginTop: "1px",
+          }}
+        >
+          {building.hoursBuilt}/{building.buildHoursNeeded}h
+        </div>
+      );
+    }
+
+    if (status.type === "producing") {
+      return (
+        <div
+          style={{
+            fontSize: "8px",
+            color: "#06b6d4",
+            marginTop: "1px",
+          }}
+        >
+          {building.hoursProduced}/{building.productionHoursNeeded}h
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -362,24 +472,107 @@ export default function Grid({
         )}
 
         {/* Existing buildings */}
-        {buildings.map((b) => (
-          <div
-            key={b.id}
-            className={getBuildingClass(b)}
-            style={{
-              left: (b.x - minCx * 4) * cellSize,
-              top: (b.y - minCy * 4) * cellSize,
-              width: b.w * cellSize,
-              height: b.h * cellSize,
-            }}
-            onClick={() => onBuildingClick(b)}
-          >
-            {b.name}
-            {mode === "move" && selectedForMove?.id === b.id && (
-              <div className="move-indicator">✓</div>
-            )}
-          </div>
-        ))}
+        {buildings.map((b) => {
+          const status = getBuildingStatus(b);
+          const buildingClass = getBuildingClass(b);
+          const buildingColor = getBuildingColor(status);
+          const buildingGradient = getBuildingGradient(status);
+
+          return (
+            <div
+              key={b.id}
+              className={buildingClass}
+              style={{
+                left: (b.x - minCx * 4) * cellSize,
+                top: (b.y - minCy * 4) * cellSize,
+                width: b.w * cellSize,
+                height: b.h * cellSize,
+                background: buildingGradient,
+                borderColor: buildingColor,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "4px",
+                textAlign: "center",
+                overflow: "hidden",
+              }}
+              onClick={() => onBuildingClick(b)}
+            >
+              {/* Building name */}
+              <div
+                style={{
+                  fontSize: Math.max(
+                    9,
+                    Math.min(12, (12 / Math.max(b.w, b.h)) * 1.5)
+                  ),
+                  fontWeight: "bold",
+                  color: "#041324",
+                  lineHeight: 1.1,
+                  marginBottom: "2px",
+                }}
+              >
+                {b.name}
+              </div>
+
+              {/* Status label */}
+              <div
+                style={{
+                  fontSize: Math.max(
+                    8,
+                    Math.min(10, (10 / Math.max(b.w, b.h)) * 1.5)
+                  ),
+                  color: buildingColor,
+                  fontWeight: "bold",
+                  marginBottom: "1px",
+                }}
+              >
+                {status.label}
+              </div>
+
+              {/* Hours display */}
+              <HoursDisplay building={b} status={status} />
+
+              {/* Progress bar */}
+              {(status.type === "constructing" ||
+                status.type === "producing") && (
+                <ProgressBar
+                  progress={status.progress}
+                  color={buildingColor}
+                  height={3}
+                />
+              )}
+
+              {/* Move indicator */}
+              {mode === "move" && selectedForMove?.id === b.id && (
+                <div className="move-indicator">✓</div>
+              )}
+
+              {/* Quick info for larger buildings */}
+              {b.w * b.h >= 4 && (
+                <div
+                  style={{
+                    fontSize: "7px",
+                    color: "rgba(4, 19, 36, 0.7)",
+                    marginTop: "2px",
+                    display: "flex",
+                    gap: "2px",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                  }}
+                >
+                  {status.type === "constructing" && (
+                    <span>🏗️ {status.hoursLeft}h</span>
+                  )}
+                  {status.type === "producing" && (
+                    <span>⚙️ {status.hoursLeft}h</span>
+                  )}
+                  {status.type === "ready" && <span>💰 Ready!</span>}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

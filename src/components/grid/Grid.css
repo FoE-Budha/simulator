@@ -35,21 +35,39 @@
 
 .cell {
   box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.02);
 }
 
+.cell:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Building base styles */
 .building {
   position: absolute;
-  background: linear-gradient(180deg, #9ae6b4, #68d391);
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  color: #041324;
   cursor: pointer;
+  box-sizing: border-box;
+  z-index: 20;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+.building:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 25;
+}
+
+/* Building hover preview */
 .building-hover {
   position: absolute;
-  background: rgba(6, 182, 212, 0.3); /* Semi-transparent cyan */
+  background: rgba(6, 182, 212, 0.3);
   border: 2px dashed #06b6d4;
   border-radius: 4px;
   display: flex;
@@ -59,78 +77,13 @@
   color: white;
   z-index: 10;
   box-sizing: border-box;
-  pointer-events: none; /* Don't interfere with clicks */
-}
-
-.building.movable {
   pointer-events: none;
 }
 
-/* Make sure existing buildings are above hover */
-.building {
-  position: absolute;
-  background: linear-gradient(180deg, #9ae6b4, #68d391);
-  border: 1px solid rgba(0, 0, 0, 0.6);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  color: #041324;
-  cursor: pointer;
-  box-sizing: border-box;
-  z-index: 20; /* Above hover visualization */
-}
-
-/* Optional: Add a pulsing animation for the hover effect */
-@keyframes pulse {
-  0% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  100% {
-    opacity: 0.3;
-  }
-}
-
-.building-hover {
-  animation: pulse 2s infinite;
-}
-
-/* Optional: Change hover color if building doesn't fit */
+/* Invalid hover (collision) */
 .building-hover.invalid {
   background: rgba(239, 68, 68, 0.3);
   border-color: #ef4444;
-  animation: none;
-}
-
-/* Mode-specific building styles */
-.building.selected-for-move {
-  border: 2px solid #06b6d4;
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
-  z-index: 25;
-}
-
-.building.collect-mode {
-  background: linear-gradient(180deg, #34d399, #10b981);
-  cursor: pointer;
-}
-
-.building.collect-mode:hover {
-  background: linear-gradient(180deg, #10b981, #059669);
-  transform: scale(1.05);
-}
-
-.building.sell-mode {
-  background: linear-gradient(180deg, #f87171, #ef4444);
-  cursor: pointer;
-}
-
-.building.sell-mode:hover {
-  background: linear-gradient(180deg, #ef4444, #dc2626);
-  transform: scale(1.05);
 }
 
 /* Move hover preview */
@@ -139,11 +92,34 @@
   border: 2px dashed #f59e0b;
 }
 
+/* Mode-specific building styles */
+.building.selected-for-move {
+  border: 3px solid #06b6d4;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  z-index: 30;
+}
+
+.building.collect-mode {
+  cursor: pointer;
+}
+
+.building.collect-mode:hover {
+  transform: scale(1.05);
+}
+
+.building.sell-mode {
+  cursor: pointer;
+}
+
+.building.sell-mode:hover {
+  transform: scale(1.05);
+}
+
 /* Move indicator */
 .move-indicator {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -6px;
+  right: -6px;
   background: #06b6d4;
   color: white;
   width: 16px;
@@ -154,4 +130,40 @@
   justify-content: center;
   font-size: 10px;
   font-weight: bold;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Pulsing animation for ready buildings */
+@keyframes pulse-ready {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.building[style*="background: linear-gradient(180deg, #10b981"] {
+  animation: pulse-ready 2s infinite;
+}
+
+/* Pulsing for construction */
+@keyframes pulse-constructing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+.building[style*="background: linear-gradient(180deg, #f59e0b"] {
+  animation: pulse-constructing 3s infinite;
 }

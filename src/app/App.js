@@ -40,6 +40,7 @@ export default function App() {
   const [buildings, setBuildings] = useState([]);
   const [chunksMap, setChunksMap] = useState({});
   const [selectedType, setSelectedType] = useState(null);
+  const [gameTime, setGameTime] = useState(0);
 
   // ui state
   const [chunkDialog, setChunkDialog] = useState(null);
@@ -72,6 +73,139 @@ export default function App() {
       }
     }
     return null;
+  };
+
+  // -----------------------------
+  // TIME MANAGEMENT FUNCTIONS
+  // -----------------------------
+
+  /**
+   * Skip forward in time by specified hours
+   * Updates all buildings' construction and production progress
+   */
+  const skipTime = (hours) => {
+    if (hours <= 0) return;
+
+    // Update game time
+    setGameTime((prev) => prev + hours);
+
+    // Update all buildings' progress
+    setBuildings((prev) =>
+      prev.map((building) => {
+        const newBuilding = { ...building };
+
+        // 1. Advance construction progress
+        if (building.hoursBuilt < building.buildHoursNeeded) {
+          const hoursBuilt = Math.min(
+            building.hoursBuilt + hours,
+            building.buildHoursNeeded
+          );
+          newBuilding.hoursBuilt = hoursBuilt;
+
+          // Check if construction just completed
+          if (
+            hoursBuilt >= building.buildHoursNeeded &&
+            building.hoursBuilt < building.buildHoursNeeded
+          ) {
+            // Building just finished construction
+            console.log(`${building.name} construction completed!`);
+          }
+        }
+
+        // 2. Advance production progress (only if construction is complete)
+        if (building.hoursBuilt >= building.buildHoursNeeded) {
+          const currentProduced = building.hoursProduced || 0;
+          newBuilding.hoursProduced = currentProduced + hours;
+        }
+
+        return newBuilding;
+      })
+    );
+
+    // Add time skip log
+    const log = createActionLog(
+      "time",
+      `Advanced time by ${hours} hours`,
+      resources,
+      {},
+      { hours: hours, newGameTime: gameTime + hours }
+    );
+    setLogs((prev) => mergeLog(log, prev));
+  };
+
+  /**
+   * Collect from all buildings that are ready
+   */
+  const collectAllReady = () => {
+    let totalYield = { coins: 0, supplies: 0, alloy: 0, shards: 0, goods: 0 };
+    let collectedCount = 0;
+    let updatedResources = { ...resources };
+
+    // First, calculate all yields
+    buildings.forEach((building) => {
+      // Check if building is ready to collect
+      const isConstructed = building.hoursBuilt >= building.buildHoursNeeded;
+      const isProductionReady =
+        (building.hoursProduced || 0) >= building.productionHoursNeeded;
+
+      if (isConstructed && isProductionReady) {
+        const buildingType = getBuildingTypeFromPalette(building.typeId);
+        if (!buildingType) return;
+
+        const result = sim.applyCollect(
+          updatedResources,
+          buildingType,
+          aggregates
+        );
+        if (result) {
+          // Add to totals
+          Object.keys(totalYield).forEach((key) => {
+            if (result.delta[key]) {
+              totalYield[key] += result.delta[key];
+            }
+          });
+
+          // Update resources for next calculation
+          updatedResources = result.resources;
+          collectedCount++;
+        }
+      }
+    });
+
+    if (collectedCount > 0) {
+      // Update actual resources
+      setResources(updatedResources);
+
+      // Reset production counters for collected buildings
+      setBuildings((prev) =>
+        prev.map((building) => {
+          const isConstructed =
+            building.hoursBuilt >= building.buildHoursNeeded;
+          const isProductionReady =
+            (building.hoursProduced || 0) >= building.productionHoursNeeded;
+
+          if (isConstructed && isProductionReady) {
+            return { ...building, hoursProduced: 0 };
+          }
+          return building;
+        })
+      );
+
+      // Add log
+      const log = createActionLog(
+        "collect",
+        `Collected from ${collectedCount} buildings`,
+        updatedResources,
+        totalYield,
+        { count: collectedCount }
+      );
+      setLogs((prev) => mergeLog(log, prev));
+
+      return collectedCount;
+    } else {
+      alert("No buildings ready to collect from!");
+      return 0;
+    }
   };
 
   // -----------------------------
@@ -123,47 +257,61 @@ export default function App() {
     const result = sim.applyBuild(resources, selectedType);
     if (!result) return;
 
+    // Convert milliseconds to hours for our time system
+    const buildHoursNeeded = (selectedType.buildTime || 0) / 3600000;
+    const productionHoursNeeded = (selectedType.productionTime || 0) / 3600000;
+
+    // Create building with time properties
+    const newBuilding = {
+      id: uuid("b_"),
+      typeId: selectedType.id,
+      name: selectedType.name,
+      w: selectedType.w,
+      h: selectedType.h,
+      x,
+      y,
+
+      // Time properties (in HOURS)
+      buildHoursNeeded: buildHoursNeeded,
+      productionHoursNeeded: productionHoursNeeded,
+      hoursBuilt: 0, // How many hours already built
+      hoursProduced: 0, // How many hours since last collection
+    };
+
     const log = createActionLog(
       "build",
       `Built ${selectedType.name}`,
       result.resources,
       result.delta,
-      { coordinates: { x, y } }
-    );
-    setLogs((prev) => mergeLog(log, prev));
-
-    setResources(result.resources);
-
-    setBuildings((prev) => [
-      ...prev,
       {
-        id: uuid("b_"),
-        typeId: selectedType.id,
-        name: selectedType.name,
-        w: selectedType.w,
-        h: selectedType.h,
-        x,
-        y,
-      },
-    ]);
+        coordinates: { x, y },
+        buildTime: buildHoursNeeded,
+        productionTime: productionHoursNeeded,
+      }
+    );
+
+    // Update state
+    setResources(result.resources);
+    setBuildings((prev) => [...prev, newBuilding]);
+    setLogs((prev) => mergeLog(log, prev));
   };
 
-  // Add move handler
   const handleMoveBuilding = (buildingId, newX, newY) => {
     setBuildings((prev) =>
       prev.map((building) => {
         if (building.id === buildingId) {
-          // Create a log for the move
           const log = createActionLog(
             "move",
             `Moved ${building.name}`,
             resources,
-            {}, // No delta for move
-            { from: { x: building.x, y: building.y }, to: { x: newX, y: newY } }
+            {},
+            {
+              from: { x: building.x, y: building.y },
+              to: { x: newX, y: newY },
+            }
           );
           setLogs((prev) => mergeLog(log, prev));
 
-          // Update building position
           return {
             ...building,
             x: newX,
@@ -179,11 +327,33 @@ export default function App() {
     const buildingType = getBuildingTypeFromPalette(building.typeId);
     if (!buildingType) return;
 
-    // 1. FIRST get the result
+    // 1. Check if building is fully constructed
+    if (building.hoursBuilt < building.buildHoursNeeded) {
+      const hoursLeft = building.buildHoursNeeded - building.hoursBuilt;
+      alert(
+        `🚧 ${building.name} under construction!\nNeed ${hoursLeft} more hours`
+      );
+      return;
+    }
+
+    // 2. Check if production is ready (has enough hours)
+    if (building.hoursProduced < building.productionHoursNeeded) {
+      const hoursLeft = building.productionHoursNeeded - building.hoursProduced;
+      alert(`⏳ ${building.name} not ready!\nNeed ${hoursLeft} more hours`);
+      return;
+    }
+
+    // 3. Get collection result
     const result = sim.applyCollect(resources, buildingType, aggregates);
     if (!result) return;
 
-    // 2. THEN create log
+    // 4. Reset production counter for this building
+    setBuildings((prev) =>
+      prev.map((b) => (b.id === building.id ? { ...b, hoursProduced: 0 } : b))
+    );
+
+    // 5. Update resources and log
+    setResources(result.resources);
     const log = createActionLog(
       "collect",
       `Collected from ${building.name}`,
@@ -223,7 +393,7 @@ export default function App() {
     const result = sim.applySell(resources, buildingType);
     if (!result) return;
 
-    // 2. THEN create log
+    // 2. Create log
     const log = createActionLog(
       "sell",
       `Sold ${building.name}`,
@@ -231,13 +401,12 @@ export default function App() {
       result.delta,
       { building: building.name }
     );
-    setLogs((prev) => mergeLog(log, prev));
 
     // 3. Update state
     setResources(result.resources);
     setBuildings((b) => b.filter((x) => x.id !== building.id));
+    setLogs((prev) => mergeLog(log, prev));
   };
-
   // -----------------------------
   // Expansion unlock
   // -----------------------------
@@ -246,7 +415,6 @@ export default function App() {
     setChunkDialog(chunk);
   };
 
-  // Chunk unlocking with global counters
   const handleUnlockChunk = (chunkKey, unlockData) => {
     const { type, amount } = unlockData;
 
@@ -261,7 +429,7 @@ export default function App() {
       return;
     }
 
-    // Update GLOBAL unlock counter
+    // Update global unlock counter for this type
     setUnlockCounts((prev) => ({
       ...prev,
       [type]: prev[type] + 1,
@@ -287,8 +455,11 @@ export default function App() {
       "unlock",
       `Unlocked expansion with ${type}`,
       { ...resources, [type]: resources[type] - amount },
-      { [type]: -amount }, // Negative delta (cost)
-      { chunk: chunkKey, unlockNumber: unlockCounts[type] + 1 }
+      { [type]: -amount },
+      {
+        chunk: chunkKey,
+        unlockNumber: unlockCounts[type] + 1,
+      }
     );
     setLogs((prev) => mergeLog(log, prev));
 
@@ -304,6 +475,7 @@ export default function App() {
         resources,
         buildings,
         logs,
+        gameTime, // Include game time in snapshots
       },
     ]);
   };
@@ -320,11 +492,11 @@ export default function App() {
         goods: resources.goods - snap.resources.goods,
         alloy: resources.alloy - snap.resources.alloy,
         population: resources.population - snap.resources.population,
+        gameTime: gameTime - (snap.gameTime || 0),
       },
     });
   };
 
-  // Manual resource update handler
   const handleUpdateResources = (newResources) => {
     setResources((prev) => ({
       ...prev,
@@ -335,7 +507,7 @@ export default function App() {
       "resources",
       "Updated resources",
       { ...resources, ...newResources },
-      {}, // No delta shown for manual updates
+      {},
       { action: "manual_update" }
     );
     setLogs((prev) => mergeLog(log, prev));
@@ -394,6 +566,18 @@ export default function App() {
   };
 
   // -----------------------------
+  // Calculate ready buildings count (for UI display)
+  // -----------------------------
+  const readyToCollectCount = useMemo(() => {
+    return buildings.filter((building) => {
+      const isConstructed = building.hoursBuilt >= building.buildHoursNeeded;
+      const isProductionReady =
+        building.hoursProduced >= building.productionHoursNeeded;
+      return isConstructed && isProductionReady;
+    }).length;
+  }, [buildings]);
+
+  // -----------------------------
   // RENDER
   // -----------------------------
 
@@ -428,6 +612,11 @@ export default function App() {
         saveSnapshot={saveSnapshot}
         compareSnapshot={compareSnapshot}
         onOpenResourcesDialog={() => setResourcesDialog(true)}
+        // NEW: Pass time-related props
+        gameTime={gameTime}
+        skipTime={skipTime}
+        collectAllReady={collectAllReady}
+        readyToCollectCount={readyToCollectCount}
       />
 
       {chunkDialog && (
