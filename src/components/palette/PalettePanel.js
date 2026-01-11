@@ -20,41 +20,13 @@ export default function PalettePanel({
     "townhall",
   ];
 
-  // Load persistent collapse state from storage - collapsed by default
-  const [collapseState, setCollapseState] = React.useState(() => {
-    try {
-      const saved = localStorage.getItem("paletteCollapse");
-      if (saved) {
-        return JSON.parse(saved);
-      } else {
-        // Default to all groups collapsed
-        const defaultCollapsed = {};
-        GROUP_ORDER.forEach((group) => {
-          defaultCollapsed[
-            group.charAt(0).toUpperCase() + group.slice(1)
-          ] = false;
-        });
-        return defaultCollapsed;
-      }
-    } catch {
-      // Return all collapsed by default
-      const defaultCollapsed = {};
-      GROUP_ORDER.forEach((group) => {
-        defaultCollapsed[
-          group.charAt(0).toUpperCase() + group.slice(1)
-        ] = false;
-      });
-      return defaultCollapsed;
-    }
-  });
+  // State to track which group is expanded (null means all collapsed)
+  const [expandedGroup, setExpandedGroup] = React.useState(null);
 
   const handleGroupToggle = (groupName) => {
-    const newState = {
-      ...collapseState,
-      [groupName]: !(collapseState[groupName] ?? false),
-    };
-    setCollapseState(newState);
-    localStorage.setItem("paletteCollapse", JSON.stringify(newState));
+    // If clicking the already expanded group, collapse it
+    // Otherwise, expand the clicked group
+    setExpandedGroup(expandedGroup === groupName ? null : groupName);
   };
 
   // Sort items by tier - handles both numeric and string tiers (T1, T2, etc.)
@@ -117,7 +89,7 @@ export default function PalettePanel({
         if (!paletteGroups[groupKey]) return null;
 
         const groupName = groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
-        const isOpen = collapseState[groupName] ?? false; // Default to collapsed
+        const isOpen = expandedGroup === groupName; // Only open if this is the expanded group
         const items = sortItemsByTier(paletteGroups[groupKey]);
 
         return (
