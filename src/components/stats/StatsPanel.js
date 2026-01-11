@@ -1,5 +1,6 @@
 import React from "react";
 import { formatNumber } from "../../utils.js";
+import "./StatsPanel.css";
 
 export default function StatsPanel({
   resources,
@@ -13,7 +14,7 @@ export default function StatsPanel({
 }) {
   // Safety check for resources
   if (!resources) {
-    return <div style={{ padding: "12px", color: "#ff6b6b" }}>Loading...</div>;
+    return <div className="loading-message">Loading...</div>;
   }
 
   // Ensure logs is an array
@@ -35,32 +36,85 @@ export default function StatsPanel({
     defense: resources.defense || 0,
   };
 
+  // Function to export logs as CSV
+  const exportLogsCSV = () => {
+    if (safeLogs.length === 0) return;
+
+    // Create CSV content
+    const headers = [
+      "Timestamp",
+      "Event Type",
+      "Message",
+      "Resources",
+      "Details",
+    ];
+    const csvRows = [
+      headers.join(","),
+      ...safeLogs.map((log) => {
+        const row = [
+          log.timestamp || new Date().toISOString(),
+          log.type || "unknown",
+          log.message || "Unknown event",
+          log.formattedResources || "",
+          log.formattedDetail || "",
+        ];
+
+        // Escape special characters for CSV
+        return row
+          .map((cell) => {
+            const cellStr = String(cell);
+            if (
+              cellStr.includes(",") ||
+              cellStr.includes('"') ||
+              cellStr.includes("\n")
+            ) {
+              return `"${cellStr.replace(/"/g, '""')}"`;
+            }
+            return cellStr;
+          })
+          .join(",");
+      }),
+    ];
+
+    const csvContent = csvRows.join("\n");
+
+    // Create and download the CSV file
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `game-logs-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div
-      style={{
-        width: "320px",
-        padding: "12px",
-        background: "rgba(255,255,255,0.03)",
-      }}
-    >
-      <div className="header">Resources</div>
-      <div style={{ marginBottom: "12px" }}>
-        <div>Coins: {formatNumber(safeResources.coins)}</div>
-        <div>Supplies: {formatNumber(safeResources.supplies)}</div>
-        <div>Goods: {formatNumber(safeResources.goods)}</div>
-        <div>Shards: {formatNumber(safeResources.shards)}</div>
-        <div>Alloy: {formatNumber(safeResources.alloy)}</div>
+    <div className="stats-panel">
+      {/* Resources Header Row */}
+      <div className="resources-header">
+        <strong className="resources-title">Resources</strong>
         <button
-          className="button small"
+          className="button small edit-button"
           onClick={onOpenResourcesDialog}
-          style={{ padding: "4px 8px", fontSize: "11px" }}
         >
           Edit
         </button>
       </div>
 
+      <div className="resources-section">
+        <div>Coins: {formatNumber(safeResources.coins)}</div>
+        <div>Supplies: {formatNumber(safeResources.supplies)}</div>
+        <div>Goods: {formatNumber(safeResources.goods)}</div>
+        <div>Shards: {formatNumber(safeResources.shards)}</div>
+        <div>Alloy: {formatNumber(safeResources.alloy)}</div>
+      </div>
+
       <div className="header">Stats</div>
-      <div style={{ marginBottom: "12px" }}>
+      <div className="stats-section">
         <div>Population: {formatNumber(safeResources.population)}</div>
         <div>Euphoria: {formatNumber(safeResources.euphoria)}</div>
         <div>Coin Boost: {safeResources.coinBoost * 100}%</div>
@@ -73,7 +127,7 @@ export default function StatsPanel({
       {aggregates && (
         <>
           <div className="header">Aggregates</div>
-          <div style={{ marginBottom: "12px", fontSize: "13px" }}>
+          <div className="aggregates-section">
             <div>Euphoria Ratio: {aggregates.euphRatio || 0}%</div>
             <div>Multiplier: {(aggregates.eupMultiplier || 1).toFixed(2)}x</div>
             <div>Final Coins: {aggregates.finalCoins || 0}</div>
@@ -83,7 +137,7 @@ export default function StatsPanel({
       )}
 
       <div className="header">Actions</div>
-      <div style={{ marginBottom: "12px", display: "flex", gap: "8px" }}>
+      <div className="actions-section">
         <button
           className="button small"
           onClick={() =>
@@ -92,24 +146,29 @@ export default function StatsPanel({
         >
           Save Snapshot
         </button>
-        {lastCompare && (
-          <button
-            className="button small"
-            onClick={() => console.log("Compare details:", lastCompare)}
-          >
-            Show Diff
-          </button>
-        )}
+        <button className="button small" onClick={() => compareSnapshot()}>
+          Compare Snapshots
+        </button>
       </div>
 
-      <div className="header">Recent Logs</div>
-      <div style={{ maxHeight: "500px", overflowY: "auto", fontSize: "12px" }}>
+      {/* Recent Logs with export button */}
+      <div className="logs-header">
+        <div className="header">Recent Logs</div>
+        <button
+          className="button small export-button"
+          onClick={exportLogsCSV}
+          disabled={safeLogs.length === 0}
+          title="Export logs as CSV file (opens in Excel)"
+        >
+          Export Logs
+        </button>
+      </div>
+
+      <div className="logs-container">
         {safeLogs.length === 0 ? (
-          <div style={{ color: "#94a3b8", fontStyle: "italic" }}>
-            No logs yet
-          </div>
+          <div className="no-logs-message">No logs yet</div>
         ) : (
-          safeLogs.slice(-300).map((log, idx) => {
+          safeLogs.slice(-10).map((log, idx) => {
             // Determine color based on log type
             let logColor = "#94a3b8";
             if (log.type === "build") logColor = "#06b6d4";
@@ -122,50 +181,22 @@ export default function StatsPanel({
             return (
               <div
                 key={log.id || idx}
-                style={{
-                  marginBottom: "8px",
-                  padding: "6px",
-                  background: "rgba(255,255,255,0.02)",
-                  borderRadius: "4px",
-                  borderLeft: `3px solid ${logColor}`,
-                }}
+                className="log-entry"
+                style={{ borderLeftColor: logColor }}
               >
                 {/* Header with count (already formatted in log.message) */}
-                <div
-                  style={{
-                    fontWeight: "bold",
-                    color: logColor,
-                    fontSize: "13px",
-                    marginBottom: "2px",
-                  }}
-                >
+                <div className="log-message" style={{ color: logColor }}>
                   {log.message || "Unknown event"}
                 </div>
 
                 {/* Resources (already formatted in log.formattedResources) */}
                 {log.formattedResources && (
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#94a3b8",
-                      marginBottom: log.formattedDetail ? "2px" : "0",
-                    }}
-                  >
-                    {log.formattedResources}
-                  </div>
+                  <div className="log-resources">{log.formattedResources}</div>
                 )}
 
                 {/* Detail (Cost/Yield/Refund - already formatted) */}
                 {log.formattedDetail && (
-                  <div
-                    style={{
-                      fontSize: "10px",
-                      color: "#64748b",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {log.formattedDetail}
-                  </div>
+                  <div className="log-detail">{log.formattedDetail}</div>
                 )}
               </div>
             );

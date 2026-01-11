@@ -1,0 +1,146 @@
+/* Main Panel */
+.stats-panel {
+  width: 320px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Loading Message */
+.loading-message {
+  padding: 12px;
+  color: #ff6b6b;
+}
+
+/* Resources Header - Title and Edit button in same row */
+.resources-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.resources-title {
+  font-size: 14px;
+}
+
+.edit-button {
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+}
+
+/* Sections */
+.resources-section,
+.stats-section,
+.aggregates-section {
+  margin-bottom: 12px;
+}
+
+.aggregates-section {
+  font-size: 13px;
+}
+
+/* Headers */
+.header {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+/* Actions Section */
+.actions-section {
+  margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Buttons */
+.button {
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.button.small {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Logs Header with Export button */
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.export-button {
+  padding: 3px 6px !important;
+  font-size: 10px !important;
+}
+
+/* Logs Container */
+.logs-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+  overflow-y: auto;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 8px;
+  min-height: 200px;
+}
+
+/* No Logs Message */
+.no-logs-message {
+  color: #94a3b8;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Log Entry */
+.log-entry {
+  margin-bottom: 8px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+  border-left: 3px solid;
+}
+
+.log-message {
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.log-resources {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 2px;
+}
+
+.log-detail {
+  font-size: 10px;
+  color: #64748b;
+  font-style: italic;
+}
