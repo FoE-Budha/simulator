@@ -109,7 +109,7 @@ export default function StatsPanel({
             No logs yet
           </div>
         ) : (
-          safeLogs.slice(-5).map((log, idx) => {
+          safeLogs.slice(-300).map((log, idx) => {
             // Determine color based on log type
             let logColor = "#94a3b8";
             if (log.type === "build") logColor = "#06b6d4";
