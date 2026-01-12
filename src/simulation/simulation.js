@@ -77,14 +77,17 @@ export function computeAggregates(buildingInstances, paletteGroups) {
     baseQuantum += bp.quantum;
   });
 
-  const euphRatio = POPULATION > 0 ? Math.round((EUPHORIA / POPULATION) * 100) : 100;
+  const euphRatio =
+    POPULATION > 0 ? Math.round((EUPHORIA / POPULATION) * 100) : 100;
   const eupMultiplier = getEuphoriaMultiplier(euphRatio);
 
   // Final production after applying the rule:
   // coins_final = baseCoins * (eupMultiplier + coinBoost)
   // supplies_final = baseSupplies * (eupMultiplier + suppliesBoost)
   const finalCoins = Math.round(baseCoins * (eupMultiplier + COINBOOST));
-  const finalSupplies = Math.round(baseSupplies * (eupMultiplier + SUPPLIESBOOST));
+  const finalSupplies = Math.round(
+    baseSupplies * (eupMultiplier + SUPPLIESBOOST)
+  );
   const finalAlloy = Math.round(baseAlloy * eupMultiplier);
   const finalQuantum = Math.round(baseQuantum);
 
@@ -113,7 +116,7 @@ export function computeAggregates(buildingInstances, paletteGroups) {
 export function applyBuild(resources, buildingType) {
   // Create a NEW resources object
   const newResources = { ...resources };
-  
+
   const c = costs(buildingType);
   newResources.coins -= c.coins;
   newResources.supplies -= c.supplies;
@@ -145,36 +148,65 @@ export function applyBuild(resources, buildingType) {
 }
 
 export function applyCollect(resources, buildingType, aggregates = null) {
-  // Create a NEW resources object
+  console.log("=== applyCollect DEBUG ===");
+  console.log("Building:", buildingType);
+  console.log("Aggregates provided:", aggregates);
+
   const newResources = { ...resources };
-  
+
   const bp = baseProduction(buildingType);
+  console.log("Base production:", bp);
+
   let eupMultiplier = 1;
   let coinBoost = 0,
     suppliesBoost = 0;
-    
+
   if (aggregates) {
+    console.log("Using AGGREGATES for calculation");
     eupMultiplier = aggregates.eupMultiplier;
     coinBoost = aggregates.COINBOOST;
     suppliesBoost = aggregates.SUPPLIESBOOST;
   } else {
-    // Calculate for individual building
+    console.log("FALLING BACK to individual building calculation");
     const pe = placementEffects(buildingType);
-    const ratio = pe.population > 0 ? Math.round((pe.euphoria / pe.population) * 100) : 100;
+    console.log("Placement effects:", pe);
+    const ratio =
+      pe.population > 0 ? Math.round((pe.euphoria / pe.population) * 100) : 100;
     eupMultiplier = getEuphoriaMultiplier(ratio);
     coinBoost = pe.coinBoost;
     suppliesBoost = pe.suppliesBoost;
   }
-  
+
+  console.log(
+    "Final multipliers - eupMultiplier:",
+    eupMultiplier,
+    "coinBoost:",
+    coinBoost,
+    "suppliesBoost:",
+    suppliesBoost
+  );
+
   const coinsGain = Math.round(bp.coins * (eupMultiplier + coinBoost));
-  const suppliesGain = Math.round(bp.supplies * (eupMultiplier + suppliesBoost));
+  const suppliesGain = Math.round(
+    bp.supplies * (eupMultiplier + suppliesBoost)
+  );
   const alloyGain = Math.round(bp.alloy * eupMultiplier);
-  const quantumGain = Math.round(bp.quantum || 0);  // Add fallback
+  const quantumGain = Math.round(bp.quantum || 0);
+
+  console.log(
+    "Gains - coins:",
+    coinsGain,
+    "supplies:",
+    suppliesGain,
+    "alloy:",
+    alloyGain
+  );
 
   newResources.coins += coinsGain;
   newResources.supplies += suppliesGain;
   newResources.alloy += alloyGain;
-  newResources.quantumActions = (newResources.quantumActions || 0) + quantumGain;
+  newResources.quantumActions =
+    (newResources.quantumActions || 0) + quantumGain;
 
   return {
     resources: newResources,
@@ -187,25 +219,26 @@ export function applyCollect(resources, buildingType, aggregates = null) {
   };
 }
 
-export function applySell(resources, buildingType) {
-  // Create a NEW resources object
+export function applySell(resources, buildingType, aggregates = null) {
+  console.log("=== applySell DEBUG ===");
+  console.log("Selling building:", buildingType);
+  console.log("Aggregates passed to applySell:", aggregates);
+
   const newResources = { ...resources };
-  
-  // Optional: Final collection from the building
-  const collectResult = applyCollect(newResources, buildingType);
-  
-  // Apply refund of 25% of cost to THE COLLECTED RESOURCES
+
+  // Check if aggregates is being passed correctly
+  console.log("Calling applyCollect with aggregates:", aggregates);
+  const collectResult = applyCollect(newResources, buildingType, aggregates);
+
   const cost = costs(buildingType);
   const refundCoins = Math.round(0.25 * (cost.coins || 0));
   const refundSupplies = Math.round(0.25 * (cost.supplies || 0));
   const refundAlloy = Math.round(0.25 * (cost.alloy || 0));
-  
-  // Use collectResult.resources, not newResources!
+
   collectResult.resources.coins += refundCoins;
   collectResult.resources.supplies += refundSupplies;
   collectResult.resources.alloy += refundAlloy;
-  
-  // REVERSE placement effects on the collected + refunded resources
+
   const pe = placementEffects(buildingType);
   collectResult.resources.population -= pe.population;
   collectResult.resources.euphoria -= pe.euphoria;
@@ -215,7 +248,6 @@ export function applySell(resources, buildingType) {
   collectResult.resources.defense -= pe.defense;
 
   return {
-    // Return collectResult.resources, not newResources!
     resources: collectResult.resources,
     delta: {
       ...collectResult.delta,

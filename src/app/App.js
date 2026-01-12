@@ -133,85 +133,13 @@ export default function App() {
     setLogs((prev) => mergeLog(log, prev));
   };
 
-  /**
-   * Collect from all buildings that are ready
-   */
-  const collectAllReady = () => {
-    let totalYield = { coins: 0, supplies: 0, alloy: 0, shards: 0, goods: 0 };
-    let collectedCount = 0;
-    let updatedResources = { ...resources };
-
-    // First, calculate all yields
-    buildings.forEach((building) => {
-      // Check if building is ready to collect
-      const isConstructed = building.hoursBuilt >= building.buildHoursNeeded;
-      const isProductionReady =
-        (building.hoursProduced || 0) >= building.productionHoursNeeded;
-
-      if (isConstructed && isProductionReady) {
-        const buildingType = getBuildingTypeFromPalette(building.typeId);
-        if (!buildingType) return;
-
-        const result = sim.applyCollect(
-          updatedResources,
-          buildingType,
-          aggregates
-        );
-        if (result) {
-          // Add to totals
-          Object.keys(totalYield).forEach((key) => {
-            if (result.delta[key]) {
-              totalYield[key] += result.delta[key];
-            }
-          });
-
-          // Update resources for next calculation
-          updatedResources = result.resources;
-          collectedCount++;
-        }
-      }
-    });
-
-    if (collectedCount > 0) {
-      // Update actual resources
-      setResources(updatedResources);
-
-      // Reset production counters for collected buildings
-      setBuildings((prev) =>
-        prev.map((building) => {
-          const isConstructed =
-            building.hoursBuilt >= building.buildHoursNeeded;
-          const isProductionReady =
-            (building.hoursProduced || 0) >= building.productionHoursNeeded;
-
-          if (isConstructed && isProductionReady) {
-            return { ...building, hoursProduced: 0 };
-          }
-          return building;
-        })
-      );
-
-      // Add log
-      const log = createActionLog(
-        "collect",
-        `Collected from ${collectedCount} buildings`,
-        updatedResources,
-        totalYield,
-        { count: collectedCount }
-      );
-      setLogs((prev) => mergeLog(log, prev));
-
-      return collectedCount;
-    } else {
-      alert("No buildings ready to collect from!");
-      return 0;
-    }
-  };
-
   // -----------------------------
   // CORE ACTIONS
   // -----------------------------
 
+  /**
+   * Place building
+   */
   const handlePlaceBuilding = (x, y) => {
     if (!selectedType) return;
 
@@ -296,6 +224,9 @@ export default function App() {
     setLogs((prev) => mergeLog(log, prev));
   };
 
+  /**
+   * Move building
+   */
   const handleMoveBuilding = (buildingId, newX, newY) => {
     setBuildings((prev) =>
       prev.map((building) => {
@@ -367,6 +298,9 @@ export default function App() {
     setResources(result.resources);
   };
 
+  /**
+   * Sell building & Collect if ready
+   */
   const handleSell = (building) => {
     const buildingType = getBuildingTypeFromPalette(building.typeId);
     if (!buildingType || building.typeId === "town hall_1764107877") return;
@@ -390,7 +324,7 @@ export default function App() {
     }
 
     // 1. FIRST get the result
-    const result = sim.applySell(resources, buildingType);
+    const result = sim.applySell(resources, buildingType, aggregates);
     if (!result) return;
 
     // 2. Create log
@@ -408,8 +342,9 @@ export default function App() {
     setLogs((prev) => mergeLog(log, prev));
   };
 
-
-  // SPEED UP WITH Shards
+  /**
+   * SPEED UP WITH Shards
+   */
   const handleSpeedUpBuilding = (building) => {
     // 1. Get building type
     const buildingType = getBuildingTypeFromPalette(building.typeId);
@@ -417,22 +352,22 @@ export default function App() {
       console.log("Building type not found");
       return;
     }
-    
+
     // 2. Extract tier from "T1", "T2", "T3", etc.
     const tierStr = buildingType.tier || "T1";
     const tier = parseInt(tierStr.substring(1), 10) || 1;
-    
+
     console.log(`Speed up: ${building.name}, Tier: T${tier} (raw: ${tierStr})`);
-    
+
     // 3. Check building status and calculate cost
     let shardCost = 0;
     let hoursToAdd = 0;
     let actionType = "";
-    
+
     if (building.hoursBuilt < building.buildHoursNeeded) {
       // CONSTRUCTION speed-up
       actionType = "construction";
-      
+
       if (tier === 2) {
         shardCost = 25;
         hoursToAdd = 1;
@@ -444,11 +379,10 @@ export default function App() {
         shardCost = 10;
         hoursToAdd = 0; // T1 cannot be sped up
       }
-      
     } else if (building.hoursProduced < building.productionHoursNeeded) {
       // PRODUCTION speed-up
       actionType = "production";
-      
+
       if (tier === 2) {
         shardCost = 75;
         hoursToAdd = 10;
@@ -460,66 +394,155 @@ export default function App() {
         shardCost = 50;
         hoursToAdd = 10;
       }
-      
     } else {
       alert(`🏗️ ${building.name} is already ready to collect!`);
       return;
     }
-    
-    // 4. Check if T1 construction can be sped up
-    if (actionType === "construction" && hoursToAdd === 0) {
-      alert(`❌ T${tier} buildings cannot be sped up during construction!\nOnly T2 (25 shards) and T3 (50 shards) buildings can be sped up.`);
-      return;
-    }
-    
+
     // 5. Check shards
     if (resources.shards < shardCost) {
-      alert(`❌ Not enough shards!\nNeed: ${shardCost}\nHave: ${resources.shards}`);
+      alert(
+        `❌ Not enough shards!\nNeed: ${shardCost}\nHave: ${resources.shards}`
+      );
       return;
     }
-    
+
     // 6. Confirm
     const confirmMessage = `Speed up ${building.name} (T${tier}) ${actionType} by ${hoursToAdd} hours?\n\nCost: ${shardCost} shards`;
-    
+
     if (!window.confirm(confirmMessage)) return;
-    
+
     // 7. Apply speed-up
     let newHoursBuilt = building.hoursBuilt;
     let newHoursProduced = building.hoursProduced;
-    
+
     if (actionType === "construction") {
-      newHoursBuilt = Math.min(building.hoursBuilt + hoursToAdd, building.buildHoursNeeded);
+      newHoursBuilt = Math.min(
+        building.hoursBuilt + hoursToAdd,
+        building.buildHoursNeeded
+      );
     } else {
-      newHoursProduced = Math.min(building.hoursProduced + hoursToAdd, building.productionHoursNeeded);
+      newHoursProduced = Math.min(
+        building.hoursProduced + hoursToAdd,
+        building.productionHoursNeeded
+      );
     }
-    
+
     // 8. Update state
-    setBuildings(prev =>
-      prev.map(b =>
+    setBuildings((prev) =>
+      prev.map((b) =>
         b.id === building.id
           ? { ...b, hoursBuilt: newHoursBuilt, hoursProduced: newHoursProduced }
           : b
       )
     );
-    
-    setResources(prev => ({
+
+    setResources((prev) => ({
       ...prev,
-      shards: prev.shards - shardCost
+      shards: prev.shards - shardCost,
     }));
-    
+
     // 9. Log
     const log = createActionLog(
       "speedup",
       `Sped up ${building.name} ${actionType}`,
       { ...resources, shards: resources.shards - shardCost },
       { shards: -shardCost },
-      { building: building.name, tier, hoursAdded: hoursToAdd, actionType, shardCost }
+      {
+        building: building.name,
+        tier,
+        hoursAdded: hoursToAdd,
+        actionType,
+        shardCost,
+      }
     );
-    setLogs(prev => mergeLog(log, prev));
-    
+    setLogs((prev) => mergeLog(log, prev));
+
     // 10. Success message
-    alert(`✅ ${building.name} ${actionType} sped up by ${hoursToAdd} hours!\nShards remaining: ${resources.shards - shardCost}`);
+    alert(
+      `✅ ${
+        building.name
+      } ${actionType} sped up by ${hoursToAdd} hours!\nShards remaining: ${
+        resources.shards - shardCost
+      }`
+    );
   };
+
+  /**
+   * Collect from all buildings that are ready
+   */
+  const collectAllReady = () => {
+    let totalYield = { coins: 0, supplies: 0, alloy: 0, shards: 0, goods: 0 };
+    let collectedCount = 0;
+    let updatedResources = { ...resources };
+
+    // First, calculate all yields
+    buildings.forEach((building) => {
+      // Check if building is ready to collect
+      const isConstructed = building.hoursBuilt >= building.buildHoursNeeded;
+      const isProductionReady =
+        (building.hoursProduced || 0) >= building.productionHoursNeeded;
+
+      if (isConstructed && isProductionReady) {
+        const buildingType = getBuildingTypeFromPalette(building.typeId);
+        if (!buildingType) return;
+
+        const result = sim.applyCollect(
+          updatedResources,
+          buildingType,
+          aggregates
+        );
+        if (result) {
+          // Add to totals
+          Object.keys(totalYield).forEach((key) => {
+            if (result.delta[key]) {
+              totalYield[key] += result.delta[key];
+            }
+          });
+
+          // Update resources for next calculation
+          updatedResources = result.resources;
+          collectedCount++;
+        }
+      }
+    });
+
+    if (collectedCount > 0) {
+      // Update actual resources
+      setResources(updatedResources);
+
+      // Reset production counters for collected buildings
+      setBuildings((prev) =>
+        prev.map((building) => {
+          const isConstructed =
+            building.hoursBuilt >= building.buildHoursNeeded;
+          const isProductionReady =
+            (building.hoursProduced || 0) >= building.productionHoursNeeded;
+
+          if (isConstructed && isProductionReady) {
+            return { ...building, hoursProduced: 0 };
+          }
+          return building;
+        })
+      );
+
+      // Add log
+      const log = createActionLog(
+        "collect",
+        `Collected from ${collectedCount} buildings`,
+        updatedResources,
+        totalYield,
+        { count: collectedCount }
+      );
+      setLogs((prev) => mergeLog(log, prev));
+
+      return collectedCount;
+    } else {
+      alert("No buildings ready to collect from!");
+      return 0;
+    }
+  };
+
   // -----------------------------
   // Expansion unlock
   // -----------------------------
