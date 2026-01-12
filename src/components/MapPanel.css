@@ -1,0 +1,244 @@
+.map-panel {
+  flex: 1;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 5px;
+}
+
+/* Time Control Panel */
+.time-control-panel {
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 5px;
+}
+
+.time-control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.time-control-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #e6eef8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.time-control-buttons {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  justify-content: space-between; /* Changed to spread buttons */
+}
+
+.time-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid;
+  background: transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex: 1; /* Make buttons flexible to fill space */
+  min-width: 0; /* Allow buttons to shrink */
+}
+
+.time-button:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.time-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.time-button-1h {
+  background: rgba(6, 182, 212, 0.2);
+  border-color: #06b6d4;
+  color: #06b6d4;
+}
+
+.time-button-10h {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.time-button-collect-all {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.time-button-collect-all.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.time-button-collect-all.inactive {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.time-button-collect-all.inactive:hover {
+  transform: none;
+  opacity: 0.6;
+}
+
+.time-button-shards {
+  background: rgba(147, 51, 234, 0.2);
+  border-color: #9333ea;
+  color: #9333ea;
+}
+
+.time-button.time-button-shards.active {
+  background: rgba(147, 51, 234, 0.3) !important;
+  border-color: #9333ea !important;
+  color: #e9d5ff !important;
+  box-shadow: 0 0 10px rgba(147, 51, 234, 0.4);
+}
+
+/* MODE INSTRUCTION PANEL */
+.mode-instruction-panel {
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 5px;
+}
+
+/* Mode Controls */
+.mode-controls {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mode-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.mode-button:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.mode-button-place {
+  background: rgba(255,255,255,0.1);
+  color: #e6eef8;
+}
+
+.mode-button-place.active {
+  background: #06b6d4;
+  color: #021827;
+  box-shadow: 0 2px 4px rgba(6, 182, 212, 0.3);
+}
+
+.mode-button-move {
+  background: rgba(255,255,255,0.1);
+  color: #e6eef8;
+}
+
+.mode-button-move.active {
+  background: #06b6d4;
+  color: #021827;
+  box-shadow: 0 2px 4px rgba(6, 182, 212, 0.3);
+}
+
+.mode-button-collect {
+  background: rgba(255,255,255,0.1);
+  color: #e6eef8;
+}
+
+.mode-button-collect.active {
+  background: #10b981;
+  color: #021827;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.mode-button-sell {
+  background: rgba(255,255,255,0.1);
+  color: #e6eef8;
+}
+
+.mode-button-sell.active {
+  background: #ef4444;
+  color: #021827;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+/* Mode Info */
+.mode-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mode-description {
+  font-size: 13px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selected-building {
+  color: #06b6d4;
+  background: rgba(6, 182, 212, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Game Time Display */
+.game-time-display {
+  font-size: 13px;
+  color: #94a3b8;
+  background: rgba(255,255,255,0.03);
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Grid Container */
+.grid-area {
+  flex: 1;
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #0b1a2a, #081422);
+  min-height: 400px;
+  overflow: hidden; /* Prevent scrollbars, Grid handles scrolling */
+}

@@ -3,8 +3,8 @@ export const DEFAULT_PALETTE = {
     {
       id: "town hall_1764107877",
       name: "Town Hall",
-      w: 7,
-      h: 6,
+      w: 6,
+      h: 7,
       tier: "T1",
       group: "townhall",
       cost_coins: 0,

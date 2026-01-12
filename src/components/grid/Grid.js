@@ -17,10 +17,8 @@ export default function Grid({
 }) {
   const [hoverPosition, setHoverPosition] = useState(null);
 
-  // Always call hooks at the top level, unconditionally
   const keys = Object.keys(chunksMap);
 
-  // Calculate availableChunks unconditionally
   const availableChunks = useMemo(() => {
     const chunks = {};
     Object.values(chunksMap).forEach((chunk) => {
@@ -31,7 +29,6 @@ export default function Grid({
     return chunks;
   }, [chunksMap]);
 
-  // Return null AFTER all hooks have been called
   if (!keys.length) {
     return (
       <div className="grid-container">
@@ -64,65 +61,34 @@ export default function Grid({
   // Helper functions for building status
   const getBuildingStatus = (building) => {
     if (building.hoursBuilt < building.buildHoursNeeded) {
-      const progress = Math.round(
-        (building.hoursBuilt / building.buildHoursNeeded) * 100
-      );
       return {
         type: "constructing",
-        progress,
-        label: `Building ${progress}%`,
+        progress: Math.round((building.hoursBuilt / building.buildHoursNeeded) * 100),
         hoursLeft: building.buildHoursNeeded - building.hoursBuilt,
       };
     }
-
+  
     if (building.hoursProduced < building.productionHoursNeeded) {
-      const progress = Math.round(
-        (building.hoursProduced / building.productionHoursNeeded) * 100
-      );
       return {
         type: "producing",
-        progress,
-        label: `Producing ${progress}%`,
+        progress: Math.round((building.hoursProduced / building.productionHoursNeeded) * 100),
         hoursLeft: building.productionHoursNeeded - building.hoursProduced,
       };
     }
-
+  
     return {
       type: "ready",
       progress: 100,
-      label: "✅ Ready",
       hoursLeft: 0,
     };
   };
 
-  // Get building color based on status
-  const getBuildingColor = (status) => {
-    switch (status.type) {
-      case "constructing":
-        return "#D9DDDC"; // Gray for construction
-      case "producing":
-        return "#88E788"; // Cyan for production
-      case "ready":
-        return "#10b981"; // Green for ready
-      default:
-        return "#9ae6b4"; // Default green
-    }
-  };
-
-  // Get building background gradient based on status
-  const getBuildingGradient = (status) => {
-    const color = getBuildingColor(status);
-
-    switch (status.type) {
-      case "constructing":
-        return `linear-gradient(180deg, ${color}, ${color}dd)`;
-      case "producing":
-        return `linear-gradient(180deg, ${color}, ${color}dd)`;
-      case "ready":
-        return `linear-gradient(180deg, ${color}, ${color}dd)`;
-      default:
-        return "linear-gradient(180deg, #9ae6b4, #68d391)";
-    }
+  //Building STATUS colors
+  const STATUS_COLORS = {
+    constructing: "#D9DDDC",  // Gray
+    producing: "#88E788",     // Light green
+    ready: "#10b981",         // Green
+    default: "#9ae6b4",       // Default light green
   };
 
   const placed = buildings.map((b) => ({
@@ -351,64 +317,12 @@ export default function Grid({
     if (mode === "sell") {
       return `${baseClass} sell-mode`;
     }
+    
+    if (mode === "speedup") {
+      return `${baseClass} speedup-mode`;  // NEW
+    }
 
     return baseClass;
-  };
-
-  // Progress bar component
-  const ProgressBar = ({ progress, color, height = 4 }) => (
-    <div
-      style={{
-        width: "100%",
-        height: `${height}px`,
-        background: "rgba(0,0,0,0.3)",
-        borderRadius: "2px",
-        overflow: "hidden",
-        marginTop: "2px",
-      }}
-    >
-      <div
-        style={{
-          width: `${progress}%`,
-          height: "100%",
-          background: color,
-          transition: "width 0.3s",
-        }}
-      />
-    </div>
-  );
-
-  // Building hours display
-  const HoursDisplay = ({ building, status }) => {
-    if (status.type === "constructing") {
-      return (
-        <div
-          style={{
-            fontSize: "8px",
-            color: "#f59e0b",
-            marginTop: "1px",
-          }}
-        >
-          {building.hoursBuilt}/{building.buildHoursNeeded}h
-        </div>
-      );
-    }
-
-    if (status.type === "producing") {
-      return (
-        <div
-          style={{
-            fontSize: "8px",
-            color: "#06b6d4",
-            marginTop: "1px",
-          }}
-        >
-          {building.hoursProduced}/{building.productionHoursNeeded}h
-        </div>
-      );
-    }
-
-    return null;
   };
 
   return (
@@ -475,8 +389,6 @@ export default function Grid({
         {buildings.map((b) => {
           const status = getBuildingStatus(b);
           const buildingClass = getBuildingClass(b);
-          const buildingColor = getBuildingColor(status);
-          const buildingGradient = getBuildingGradient(status);
 
           return (
             <div
@@ -487,8 +399,8 @@ export default function Grid({
                 top: (b.y - minCy * 4) * cellSize,
                 width: b.w * cellSize,
                 height: b.h * cellSize,
-                background: buildingGradient,
-                borderColor: buildingColor,
+                background: STATUS_COLORS[status.type] || STATUS_COLORS.default,
+                borderColor: STATUS_COLORS[status.type] || STATUS_COLORS.default,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
@@ -496,6 +408,7 @@ export default function Grid({
                 padding: "4px",
                 textAlign: "center",
                 overflow: "hidden",
+                borderWidth: "2px",
               }}
               onClick={() => onBuildingClick(b)}
             >
@@ -524,7 +437,8 @@ export default function Grid({
               {b.w * b.h >= 4 && (
                 <div
                   style={{
-                    fontSize: "7px",
+                    fontSize: "10px",
+                    fontWeight: "bold",
                     color: "rgba(4, 19, 36, 0.7)",
                     marginTop: "2px",
                     display: "flex",

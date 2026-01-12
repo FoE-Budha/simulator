@@ -407,6 +407,119 @@ export default function App() {
     setBuildings((b) => b.filter((x) => x.id !== building.id));
     setLogs((prev) => mergeLog(log, prev));
   };
+
+
+  // SPEED UP WITH Shards
+  const handleSpeedUpBuilding = (building) => {
+    // 1. Get building type
+    const buildingType = getBuildingTypeFromPalette(building.typeId);
+    if (!buildingType) {
+      console.log("Building type not found");
+      return;
+    }
+    
+    // 2. Extract tier from "T1", "T2", "T3", etc.
+    const tierStr = buildingType.tier || "T1";
+    const tier = parseInt(tierStr.substring(1), 10) || 1;
+    
+    console.log(`Speed up: ${building.name}, Tier: T${tier} (raw: ${tierStr})`);
+    
+    // 3. Check building status and calculate cost
+    let shardCost = 0;
+    let hoursToAdd = 0;
+    let actionType = "";
+    
+    if (building.hoursBuilt < building.buildHoursNeeded) {
+      // CONSTRUCTION speed-up
+      actionType = "construction";
+      
+      if (tier === 2) {
+        shardCost = 25;
+        hoursToAdd = 1;
+      } else if (tier === 3) {
+        shardCost = 50;
+        hoursToAdd = 10;
+      } else {
+        // T1 or other tiers
+        shardCost = 10;
+        hoursToAdd = 0; // T1 cannot be sped up
+      }
+      
+    } else if (building.hoursProduced < building.productionHoursNeeded) {
+      // PRODUCTION speed-up
+      actionType = "production";
+      
+      if (tier === 2) {
+        shardCost = 75;
+        hoursToAdd = 10;
+      } else if (tier === 3) {
+        shardCost = 95;
+        hoursToAdd = 10;
+      } else {
+        // T1 or other tiers
+        shardCost = 50;
+        hoursToAdd = 10;
+      }
+      
+    } else {
+      alert(`🏗️ ${building.name} is already ready to collect!`);
+      return;
+    }
+    
+    // 4. Check if T1 construction can be sped up
+    if (actionType === "construction" && hoursToAdd === 0) {
+      alert(`❌ T${tier} buildings cannot be sped up during construction!\nOnly T2 (25 shards) and T3 (50 shards) buildings can be sped up.`);
+      return;
+    }
+    
+    // 5. Check shards
+    if (resources.shards < shardCost) {
+      alert(`❌ Not enough shards!\nNeed: ${shardCost}\nHave: ${resources.shards}`);
+      return;
+    }
+    
+    // 6. Confirm
+    const confirmMessage = `Speed up ${building.name} (T${tier}) ${actionType} by ${hoursToAdd} hours?\n\nCost: ${shardCost} shards`;
+    
+    if (!window.confirm(confirmMessage)) return;
+    
+    // 7. Apply speed-up
+    let newHoursBuilt = building.hoursBuilt;
+    let newHoursProduced = building.hoursProduced;
+    
+    if (actionType === "construction") {
+      newHoursBuilt = Math.min(building.hoursBuilt + hoursToAdd, building.buildHoursNeeded);
+    } else {
+      newHoursProduced = Math.min(building.hoursProduced + hoursToAdd, building.productionHoursNeeded);
+    }
+    
+    // 8. Update state
+    setBuildings(prev =>
+      prev.map(b =>
+        b.id === building.id
+          ? { ...b, hoursBuilt: newHoursBuilt, hoursProduced: newHoursProduced }
+          : b
+      )
+    );
+    
+    setResources(prev => ({
+      ...prev,
+      shards: prev.shards - shardCost
+    }));
+    
+    // 9. Log
+    const log = createActionLog(
+      "speedup",
+      `Sped up ${building.name} ${actionType}`,
+      { ...resources, shards: resources.shards - shardCost },
+      { shards: -shardCost },
+      { building: building.name, tier, hoursAdded: hoursToAdd, actionType, shardCost }
+    );
+    setLogs(prev => mergeLog(log, prev));
+    
+    // 10. Success message
+    alert(`✅ ${building.name} ${actionType} sped up by ${hoursToAdd} hours!\nShards remaining: ${resources.shards - shardCost}`);
+  };
   // -----------------------------
   // Expansion unlock
   // -----------------------------
@@ -605,6 +718,7 @@ export default function App() {
         skipTime={skipTime}
         collectAllReady={collectAllReady}
         readyToCollectCount={readyToCollectCount}
+        speedUpWithShards={handleSpeedUpBuilding}
       />
 
       <StatsPanel

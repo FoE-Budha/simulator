@@ -1,17 +1,44 @@
+/* Grid Container - Scroll container */
 .grid-container {
-  flex: 1;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  position: relative;
+}
+
+/* Center wrapper to center the grid */
+.grid-center-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  min-width: 100%;
+  min-height: 100%;
+  padding: 20px; /* Add some padding */
 }
 
+/* Grid Inner - Actual grid content */
 .grid-inner {
   position: relative;
+  justify-content: center;  
+  align-items: center;
   background: linear-gradient(180deg, #081422, #071823);
   border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* No chunks state */
+.no-chunks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  color: #94a3b8;
+}
+
+/* Chunk styles */
 .chunk {
   position: absolute;
   display: flex;
@@ -29,6 +56,7 @@
   cursor: pointer;
 }
 
+/* Row and cell styles */
 .row {
   display: flex;
 }
@@ -60,8 +88,11 @@
 
 .building:hover {
   transform: scale(1.02);
+
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   z-index: 25;
+  border-width: 3px !important;
+  transform: scale(1.02);
 }
 
 /* Building hover preview */
@@ -80,24 +111,25 @@
   pointer-events: none;
 }
 
-/* Invalid hover (collision) */
-.building-hover.invalid {
-  background: rgba(239, 68, 68, 0.3);
-  border-color: #ef4444;
-}
-
 /* Move hover preview */
 .building-hover.move-hover {
   background: rgba(245, 158, 11, 0.3);
+  border-color: #f59e0b !important;
   border: 2px dashed #f59e0b;
 }
 
 /* Mode-specific building styles */
 .building.selected-for-move {
   border: 3px solid #06b6d4;
+  border-color: #f59e0b !important;
   box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
   z-index: 30;
   pointer-events: none;
+}
+
+.building.selected-for-move:hover {
+  transform: scale(1.05);
+  border-color: #f59e0b !important;
 }
 
 .building.collect-mode {
@@ -106,6 +138,7 @@
 
 .building.collect-mode:hover {
   transform: scale(1.05);
+  border-color: #f59e0b !important;
 }
 
 .building.sell-mode {
@@ -114,6 +147,14 @@
 
 .building.sell-mode:hover {
   transform: scale(1.05);
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+.building.speedup-mode:hover {
+  border-color: #9333ea !important;
+  box-shadow: 0 0 8px rgba(147, 51, 234, 0.5);
+  transform: scale(1.03);
 }
 
 /* Move indicator */
@@ -133,38 +174,4 @@
   font-weight: bold;
   border: 2px solid white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Pulsing animation for ready buildings */
-@keyframes pulse-ready {
-  0% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
-}
-
-.building[style*="background: linear-gradient(180deg, #10b981"] {
-  animation: pulse-ready 2s infinite;
-}
-
-/* Pulsing for construction */
-@keyframes pulse-constructing {
-  0% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
-  }
-}
-
-.building[style*="background: linear-gradient(180deg, #f59e0b"] {
-  animation: pulse-constructing 3s infinite;
 }
