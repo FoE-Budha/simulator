@@ -36,30 +36,38 @@ export default function StatsPanel({
     defense: resources.defense || 0,
   };
 
-  // Function to export logs as CSV
   const exportLogsCSV = () => {
     if (safeLogs.length === 0) return;
 
-    // Create CSV content
     const headers = [
-      "Timestamp",
-      "Event Type",
+      "#",
+      "Type",
+      "Action",
       "Message",
-      "Resources",
+      "Coins",
+      "Supplies",
+      "Alloy",
+      "Shards",
+      "Population",
       "Details",
     ];
+
     const csvRows = [
       headers.join(","),
-      ...safeLogs.map((log) => {
+      ...safeLogs.map((log, index) => {
         const row = [
-          log.timestamp || new Date().toISOString(),
-          log.type || "unknown",
-          log.message || "Unknown event",
-          log.formattedResources || "",
+          index + 1,
+          log.type,
+          log.action,
+          log.message,
+          log.resources?.coins || 0,
+          log.resources?.supplies || 0,
+          log.resources?.alloy || 0,
+          log.resources?.shards || 0,
+          log.resources?.population || 0,
           log.formattedDetail || "",
         ];
 
-        // Escape special characters for CSV
         return row
           .map((cell) => {
             const cellStr = String(cell);
@@ -77,11 +85,7 @@ export default function StatsPanel({
     ];
 
     const csvContent = csvRows.join("\n");
-
-    // Create and download the CSV file
-    const blob = new Blob([csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
