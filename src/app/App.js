@@ -29,6 +29,47 @@ const initialResources = {
   defense: 0,
 };
 
+// Helper function to create default Town Hall using ONLY palette data
+const getBuildingTypeFromPalette = (typeId) => {
+  for (const groupKey in DEFAULT_PALETTE) {
+    const group = DEFAULT_PALETTE[groupKey];
+    if (Array.isArray(group)) {
+      const found = group.find((type) => type.id === typeId);
+      if (found) return found;
+    }
+  }
+  return null;
+};
+
+const createDefaultTownHall = () => {
+  const townHallType = getBuildingTypeFromPalette("town hall_1764107877");
+
+  if (!townHallType) {
+    console.error("Town Hall not found in DEFAULT_PALETTE");
+    return null;
+  }
+
+  // Convert milliseconds to hours
+  const buildHoursNeeded = (townHallType.buildTime || 0) / 3600000;
+  const productionHoursNeeded = (townHallType.productionTime || 0) / 3600000;
+
+  return {
+    id: uuid("b_"),
+    typeId: townHallType.id,
+    name: townHallType.name,
+    w: townHallType.w,
+    h: townHallType.h,
+    x: 17,
+    y: 4,
+
+    // Time properties
+    buildHoursNeeded: buildHoursNeeded,
+    productionHoursNeeded: productionHoursNeeded,
+    hoursBuilt: buildHoursNeeded, // Already fully built
+    hoursProduced: 0,
+  };
+};
+
 // -----------------------------
 // APP
 // -----------------------------
@@ -37,7 +78,10 @@ export default function App() {
   // core state
   const [resources, setResources] = useState(initialResources);
   const [paletteGroups, setPaletteGroups] = useState(DEFAULT_PALETTE);
-  const [buildings, setBuildings] = useState([]);
+  const [buildings, setBuildings] = useState(() => {
+    const townHall = createDefaultTownHall();
+    return townHall ? [townHall] : [];
+  });
   const [chunksMap, setChunksMap] = useState({});
   const [selectedType, setSelectedType] = useState(null);
   const [gameTime, setGameTime] = useState(0);
@@ -318,9 +362,9 @@ export default function App() {
       hoursBuilt: building.hoursBuilt,
       buildHoursNeeded: building.buildHoursNeeded,
       hoursProduced: building.hoursProduced,
-      productionHoursNeeded: building.productionHoursNeeded
+      productionHoursNeeded: building.productionHoursNeeded,
     });
-    
+
     if (!result) return;
 
     // 2. Create log
@@ -331,7 +375,7 @@ export default function App() {
       result.delta,
       { building: building.name }
     );
-  
+
     // Update state
     setResources(result.resources);
     setBuildings((b) => b.filter((x) => x.id !== building.id));
@@ -468,48 +512,55 @@ export default function App() {
    * Collect from all buildings that are ready
    */
   const collectAllReady = () => {
-    let totalYield = { coins: 0, supplies: 0, alloy: 0, shards: 0, goods: 0, quantum: 0 };
+    let totalYield = {
+      coins: 0,
+      supplies: 0,
+      alloy: 0,
+      shards: 0,
+      goods: 0,
+      quantum: 0,
+    };
     let collectedCount = 0;
     let updatedResources = { ...resources };
-  
+
     // Find all ready buildings first
-    const readyBuildings = buildings.filter(building => {
+    const readyBuildings = buildings.filter((building) => {
       if (!isBuildingReady(building)) return false;
-      
+
       const buildingType = getBuildingTypeFromPalette(building.typeId);
       return !!buildingType; // Also check if type exists
     });
-  
+
     if (readyBuildings.length === 0) {
       alert("No buildings ready to collect from!");
       return 0;
     }
-  
+
     // Collect from all ready buildings
     readyBuildings.forEach((building) => {
       const buildingType = getBuildingTypeFromPalette(building.typeId);
       if (!buildingType) return;
-  
+
       const result = sim.applyCollect(
         updatedResources,
         buildingType,
         aggregates
       );
-      
+
       if (result) {
         // Add to totals
         Object.keys(totalYield).forEach((key) => {
-          totalYield[key] += (result.delta[key] || 0);
+          totalYield[key] += result.delta[key] || 0;
         });
-  
+
         updatedResources = result.resources;
         collectedCount++;
       }
     });
-  
+
     // Update state once
     setResources(updatedResources);
-    
+
     // Reset production counters
     setBuildings((prev) =>
       prev.map((building) => {
@@ -519,7 +570,7 @@ export default function App() {
         return building;
       })
     );
-  
+
     // Add log
     const log = createActionLog(
       "collect",
@@ -529,7 +580,7 @@ export default function App() {
       { count: collectedCount }
     );
     setLogs((prev) => mergeLog(log, prev));
-  
+
     return collectedCount;
   };
 

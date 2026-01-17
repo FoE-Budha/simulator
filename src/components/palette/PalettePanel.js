@@ -17,7 +17,6 @@ export default function PalettePanel({
     "goods",
     "army",
     "decorations",
-    "townhall",
   ];
 
   // State to track which group is expanded (null means all collapsed)
