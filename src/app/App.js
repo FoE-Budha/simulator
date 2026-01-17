@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { uuid, createActionLog, mergeLog } from "../utils";
+import { uuid, createActionLog, mergeLog, isBuildingReady } from "../utils";
 import PalettePanel from "../components/palette/PalettePanel";
 import MapPanel from "../components/MapPanel";
 import StatsPanel from "../components/stats/StatsPanel";
@@ -259,18 +259,8 @@ export default function App() {
     if (!buildingType) return;
 
     // 1. Check if building is fully constructed
-    if (building.hoursBuilt < building.buildHoursNeeded) {
-      const hoursLeft = building.buildHoursNeeded - building.hoursBuilt;
-      alert(
-        `🚧 ${building.name} under construction!\nNeed ${hoursLeft} more hours`
-      );
-      return;
-    }
-
-    // 2. Check if production is ready (has enough hours)
-    if (building.hoursProduced < building.productionHoursNeeded) {
-      const hoursLeft = building.productionHoursNeeded - building.hoursProduced;
-      alert(`⏳ ${building.name} not ready!\nNeed ${hoursLeft} more hours`);
+    if (!isBuildingReady(building)) {
+      alert(`🚧 ${building.name} is not ready for collection!`);
       return;
     }
 
@@ -324,7 +314,13 @@ export default function App() {
     }
 
     // 1. FIRST get the result
-    const result = sim.applySell(resources, buildingType, aggregates);
+    const result = sim.applySell(resources, buildingType, aggregates, {
+      hoursBuilt: building.hoursBuilt,
+      buildHoursNeeded: building.buildHoursNeeded,
+      hoursProduced: building.hoursProduced,
+      productionHoursNeeded: building.productionHoursNeeded
+    });
+    
     if (!result) return;
 
     // 2. Create log
@@ -335,8 +331,8 @@ export default function App() {
       result.delta,
       { building: building.name }
     );
-
-    // 3. Update state
+  
+    // Update state
     setResources(result.resources);
     setBuildings((b) => b.filter((x) => x.id !== building.id));
     setLogs((prev) => mergeLog(log, prev));
@@ -472,75 +468,69 @@ export default function App() {
    * Collect from all buildings that are ready
    */
   const collectAllReady = () => {
-    let totalYield = { coins: 0, supplies: 0, alloy: 0, shards: 0, goods: 0 };
+    let totalYield = { coins: 0, supplies: 0, alloy: 0, shards: 0, goods: 0, quantum: 0 };
     let collectedCount = 0;
     let updatedResources = { ...resources };
-
-    // First, calculate all yields
-    buildings.forEach((building) => {
-      // Check if building is ready to collect
-      const isConstructed = building.hoursBuilt >= building.buildHoursNeeded;
-      const isProductionReady =
-        (building.hoursProduced || 0) >= building.productionHoursNeeded;
-
-      if (isConstructed && isProductionReady) {
-        const buildingType = getBuildingTypeFromPalette(building.typeId);
-        if (!buildingType) return;
-
-        const result = sim.applyCollect(
-          updatedResources,
-          buildingType,
-          aggregates
-        );
-        if (result) {
-          // Add to totals
-          Object.keys(totalYield).forEach((key) => {
-            if (result.delta[key]) {
-              totalYield[key] += result.delta[key];
-            }
-          });
-
-          // Update resources for next calculation
-          updatedResources = result.resources;
-          collectedCount++;
-        }
-      }
+  
+    // Find all ready buildings first
+    const readyBuildings = buildings.filter(building => {
+      if (!isBuildingReady(building)) return false;
+      
+      const buildingType = getBuildingTypeFromPalette(building.typeId);
+      return !!buildingType; // Also check if type exists
     });
-
-    if (collectedCount > 0) {
-      // Update actual resources
-      setResources(updatedResources);
-
-      // Reset production counters for collected buildings
-      setBuildings((prev) =>
-        prev.map((building) => {
-          const isConstructed =
-            building.hoursBuilt >= building.buildHoursNeeded;
-          const isProductionReady =
-            (building.hoursProduced || 0) >= building.productionHoursNeeded;
-
-          if (isConstructed && isProductionReady) {
-            return { ...building, hoursProduced: 0 };
-          }
-          return building;
-        })
-      );
-
-      // Add log
-      const log = createActionLog(
-        "collect",
-        `Collected from ${collectedCount} buildings`,
-        updatedResources,
-        totalYield,
-        { count: collectedCount }
-      );
-      setLogs((prev) => mergeLog(log, prev));
-
-      return collectedCount;
-    } else {
+  
+    if (readyBuildings.length === 0) {
       alert("No buildings ready to collect from!");
       return 0;
     }
+  
+    // Collect from all ready buildings
+    readyBuildings.forEach((building) => {
+      const buildingType = getBuildingTypeFromPalette(building.typeId);
+      if (!buildingType) return;
+  
+      const result = sim.applyCollect(
+        updatedResources,
+        buildingType,
+        aggregates
+      );
+      
+      if (result) {
+        // Add to totals
+        Object.keys(totalYield).forEach((key) => {
+          totalYield[key] += (result.delta[key] || 0);
+        });
+  
+        updatedResources = result.resources;
+        collectedCount++;
+      }
+    });
+  
+    // Update state once
+    setResources(updatedResources);
+    
+    // Reset production counters
+    setBuildings((prev) =>
+      prev.map((building) => {
+        if (isBuildingReady(building)) {
+          return { ...building, hoursProduced: 0 };
+        }
+        return building;
+      })
+    );
+  
+    // Add log
+    const log = createActionLog(
+      "collect",
+      `Collected from ${collectedCount} buildings`,
+      updatedResources,
+      totalYield,
+      { count: collectedCount }
+    );
+    setLogs((prev) => mergeLog(log, prev));
+  
+    return collectedCount;
   };
 
   // -----------------------------

@@ -11,6 +11,15 @@ export function rectsOverlap(a, b) {
   );
 }
 
+
+
+// ===== BUILDINGS STATUS =====
+
+export function isBuildingReady(building) {
+  return building.hoursBuilt >= building.buildHoursNeeded && 
+         building.hoursProduced >= building.productionHoursNeeded;
+}
+
 // ===== NUMBERS FORMATING =====
 
 export const formatNumber = (num) => {

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { rectsOverlap } from "../../utils";
+import { rectsOverlap, isBuildingReady } from "../../utils";
 import "./Grid.css";
 
 const chunkSize = 4;

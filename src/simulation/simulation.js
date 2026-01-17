@@ -148,11 +148,29 @@ export function applyBuild(resources, buildingType) {
 }
 
 export function applyCollect(resources, buildingType, aggregates = null) {
-  console.log("=== applyCollect DEBUG ===");
-  console.log("Building:", buildingType);
-  console.log("Aggregates provided:", aggregates);
-
   const newResources = { ...resources };
+
+
+  // Town Hall - use fixed values
+  if (buildingType.id === "town hall_1764107877") {
+    const coinsGain = buildingType.produces_coins || 0;
+    const suppliesGain = buildingType.produces_supplies || 0;
+    const alloyGain = buildingType.produces_alloy || 0;
+    
+    newResources.coins += coinsGain;
+    newResources.supplies += suppliesGain;
+    newResources.alloy += alloyGain;
+    
+    return {
+      resources: newResources,
+      delta: {
+        coins: coinsGain,
+        supplies: suppliesGain,
+        alloy: alloyGain,
+        quantum: 0,
+      },
+    };
+  }
 
   const bp = baseProduction(buildingType);
   console.log("Base production:", bp);
@@ -219,38 +237,52 @@ export function applyCollect(resources, buildingType, aggregates = null) {
   };
 }
 
-export function applySell(resources, buildingType, aggregates = null) {
-  console.log("=== applySell DEBUG ===");
-  console.log("Selling building:", buildingType);
-  console.log("Aggregates passed to applySell:", aggregates);
-
+export function applySell(resources, buildingType, aggregates = null, buildingStatus = null) {
   const newResources = { ...resources };
 
-  // Check if aggregates is being passed correctly
-  console.log("Calling applyCollect with aggregates:", aggregates);
-  const collectResult = applyCollect(newResources, buildingType, aggregates);
+  let collectionDelta = { coins: 0, supplies: 0, alloy: 0, quantum: 0 };
+  
+  // Check if building is ready to collect
+  const isReady = buildingStatus && 
+                  buildingStatus.hoursBuilt >= buildingStatus.buildHoursNeeded && 
+                  buildingStatus.hoursProduced >= buildingStatus.productionHoursNeeded;
 
+  // Only collect if the building is ready
+  if (isReady) {
+    const collectResult = applyCollect(newResources, buildingType, aggregates);
+    if (collectResult) {
+      Object.assign(newResources, collectResult.resources);
+      collectionDelta = collectResult.delta;  // Store collection yields
+    }
+  }
+
+  // Apply refund (25% of construction costs)
   const cost = costs(buildingType);
   const refundCoins = Math.round(0.25 * (cost.coins || 0));
   const refundSupplies = Math.round(0.25 * (cost.supplies || 0));
   const refundAlloy = Math.round(0.25 * (cost.alloy || 0));
 
-  collectResult.resources.coins += refundCoins;
-  collectResult.resources.supplies += refundSupplies;
-  collectResult.resources.alloy += refundAlloy;
+  newResources.coins += refundCoins;
+  newResources.supplies += refundSupplies;
+  newResources.alloy += refundAlloy;
 
+  // Remove placement effects
   const pe = placementEffects(buildingType);
-  collectResult.resources.population -= pe.population;
-  collectResult.resources.euphoria -= pe.euphoria;
-  collectResult.resources.coinBoost -= pe.coinBoost;
-  collectResult.resources.suppliesBoost -= pe.suppliesBoost;
-  collectResult.resources.attack -= pe.attack;
-  collectResult.resources.defense -= pe.defense;
+  newResources.population -= pe.population;
+  newResources.euphoria -= pe.euphoria;
+  newResources.coinBoost -= pe.coinBoost;
+  newResources.suppliesBoost -= pe.suppliesBoost;
+  newResources.attack -= pe.attack;
+  newResources.defense -= pe.defense;
 
+  // Return result 
   return {
-    resources: collectResult.resources,
+    resources: newResources,
     delta: {
-      ...collectResult.delta,
+      coins: collectionDelta.coins,
+      supplies: collectionDelta.supplies,
+      alloy: collectionDelta.alloy,
+      quantum: collectionDelta.quantum,
       refundCoins,
       refundSupplies,
       refundAlloy,
@@ -260,6 +292,6 @@ export function applySell(resources, buildingType, aggregates = null) {
       suppliesBoost: -pe.suppliesBoost,
       attack: -pe.attack,
       defense: -pe.defense,
-    },
+    }
   };
 }
