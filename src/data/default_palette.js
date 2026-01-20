@@ -464,7 +464,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 0,
       buildTime: 3600000, // No tier but default to T2 (1 hour)
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "copper foundry_1764107877",
@@ -487,7 +487,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 0,
       buildTime: 3600000, // No tier but default to T2 (1 hour)
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "brickworks_1764107877",
@@ -510,7 +510,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 0,
       buildTime: 3600000, // No tier but default to T2 (1 hour)
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "ropery_1764107877",
@@ -533,7 +533,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 0,
       buildTime: 3600000, // No tier but default to T2 (1 hour)
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "gunpowder manufactory_1764107877",
@@ -556,7 +556,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 0,
       buildTime: 3600000, // No tier but default to T2 (1 hour)
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
   ],
   cultural: [
@@ -581,7 +581,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 50.0,
       buildTime: 0, // T1 = 0 hours
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "gallows_1764107877",
@@ -604,7 +604,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 60.0,
       buildTime: 3600000, // T2 = 1 hour
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "pillory_1764107877",
@@ -627,7 +627,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 120.0,
       buildTime: 36000000, // T3 = 10 hours
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "church_1764107877",
@@ -650,7 +650,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 50.0,
       buildTime: 0, // T1 = 0 hours
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "printer_1764107877",
@@ -673,7 +673,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 130.0,
       buildTime: 3600000, // T2 = 1 hour
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "doctor_1764107877",
@@ -696,7 +696,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 260.0,
       buildTime: 36000000, // T3 = 10 hours
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "palace_1764107877",
@@ -719,7 +719,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 90.0,
       buildTime: 0, // T1 = 0 hours
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "library_1764107877",
@@ -742,7 +742,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 200.0,
       buildTime: 3600000, // T2 = 1 hour
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "cartographer_1764107877",
@@ -765,7 +765,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 180.0,
       buildTime: 36000000, // T3 = 10 hours
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
   ],
   army: [
@@ -790,7 +790,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 0,
       buildTime: 0, // T1 = 0 hours
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "trebuchet camp_1764107877",
@@ -813,7 +813,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 0,
       buildTime: 3600000, // T2 = 1 hour
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
     {
       id: "cannon camp_1764107877",
@@ -836,7 +836,7 @@ export const DEFAULT_PALETTE = {
       defense: 0,
       quantum_actions: 0,
       buildTime: 36000000, // T3 = 10 hours
-      productionTime: 36000000, // 10 hours
+      productionTime: 0, // No production
     },
   ],
   decorations: [
